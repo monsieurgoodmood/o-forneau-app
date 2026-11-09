@@ -9,7 +9,8 @@ APP="$HERE/app"
 rm -rf "$APP" && mkdir -p "$APP"
 cd "$APP"
 npm init -y >/dev/null
-npm i @capacitor/core @capacitor/cli @capacitor/ios --registry=https://registry.npmjs.org
+# Capacitor 6 (stable, cible iOS 13) — évite l'escalade de deployment target de la v7.
+npm i @capacitor/core@^6 @capacitor/cli@^6 @capacitor/ios@^6 --registry=https://registry.npmjs.org
 
 # Les assets web servis par l'app = contenu de la PWA (embarqués → hors-ligne, meilleur pour la revue Apple).
 # Build local (Mac) : copie web/ local. Build CI (dépôt sans web/) : clone le site déjà déployé.
@@ -24,7 +25,13 @@ rm -rf www/.git www/CNAME www/.well-known www/.nojekyll www/preflight.js 2>/dev/
 
 npx cap init "Ô Forneau !" "com.maisonforneau.oforneau" --web-dir=www
 npx cap add ios
-npx cap sync ios
+# Forcer la cible iOS 14 dans le Podfile AVANT le pod install (fait à l'étape CI suivante).
+if [ -f ios/App/Podfile ]; then
+  perl -0pi -e "s/platform :ios, '[0-9.]+'/platform :ios, '14.0'/g" ios/App/Podfile || true
+  grep -q "platform :ios" ios/App/Podfile || printf "platform :ios, '14.0'\n%s" "$(cat ios/App/Podfile)" > ios/App/Podfile
+fi
+# Copier les assets web (sans pod install : géré par l'étape CI « Installer les pods »).
+npx cap copy ios
 
 # ---- Info.plist : autorisations nécessaires au partage de photo du plat (input file/caméra) ----
 PLIST="$APP/ios/App/App/Info.plist"
