@@ -1,0 +1,39 @@
+# Build iOS cloud (macOS) pour Ô Forneau ! — sans Mac local.
+# Pré-requis dans Codemagic : connecter le compte Apple Developer (App Store Connect API key),
+# définir le groupe de variables "forneau_ios" (BUNDLE_ID = com.maisonforneau.oforneau).
+workflows:
+  ios-release:
+    name: Ô Forneau ! — iOS App Store
+    max_build_duration: 60
+    environment:
+      groups:
+        - forneau_ios            # APP_STORE_CONNECT_* + BUNDLE_ID
+      vars:
+        BUNDLE_ID: "com.maisonforneau.oforneau"
+        XCODE_WORKSPACE: "infra/ios/app/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Générer le wrapper Capacitor
+        script: |
+          cd infra/ios && bash setup-capacitor.sh
+      - name: Récupérer les certificats Apple
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Installer les pods
+        script: |
+          cd infra/ios/app/ios/App && pod install
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true    # pas de soumission App Store auto : validation humaine (règle §2.6)
