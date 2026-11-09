@@ -1,39 +1,64 @@
-# Build iOS cloud (macOS) pour Ô Forneau ! — sans Mac local.
-# Pré-requis dans Codemagic : connecter le compte Apple Developer (App Store Connect API key),
-# définir le groupe de variables "forneau_ios" (BUNDLE_ID = com.maisonforneau.oforneau).
+# Build iOS (macOS cloud) pour Ô Forneau ! — wrapper Capacitor autour de la PWA.
+# Ce fichier DOIT être à la racine du dépôt (seul endroit où Codemagic le cherche).
+#
+# À faire UNE fois dans l'UI Codemagic avant le 1er build :
+#   - Groupe de variables « forneau_ios » avec :
+#       CERT_KEY_B64 : clé privée RSA (PEM) en base64 sur UNE ligne (la même que Smart Watches ;
+#                      sans elle, fetch-signing-files --create échoue et la signature est vide).
+#   - L'intégration App Store Connect « smartwatches » est réutilisée (même compte Apple) — rien à refaire.
 workflows:
   ios-release:
-    name: Ô Forneau ! — iOS App Store
+    name: Ô Forneau ! — iOS TestFlight
+    instance_type: mac_mini_m2
     max_build_duration: 60
+    integrations:
+      app_store_connect: smartwatches
     environment:
-      groups:
-        - forneau_ios            # APP_STORE_CONNECT_* + BUNDLE_ID
-      vars:
-        BUNDLE_ID: "com.maisonforneau.oforneau"
-        XCODE_WORKSPACE: "infra/ios/app/ios/App/App.xcworkspace"
-        XCODE_SCHEME: "App"
       node: 20
       xcode: latest
       cocoapods: default
+      groups: [forneau_ios]
+      vars:
+        BUNDLE_ID: "com.maisonforneau.oforneau"
+        APP_ID: "6832736305"
     scripts:
+      - name: Signature iOS (certificats + profils)
+        script: |
+          echo "$CERT_KEY_B64" | base64 --decode > /tmp/certificate_key
+          chmod 600 /tmp/certificate_key
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --certificate-key=@file:/tmp/certificate_key \
+            --create
+          keychain initialize
+          keychain add-certificates
       - name: Générer le wrapper Capacitor
         script: |
           cd infra/ios && bash setup-capacitor.sh
-      - name: Récupérer les certificats Apple
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          keychain initialize
-          keychain add-certificates
-          xcode-project use-profiles
       - name: Installer les pods
         script: |
           cd infra/ios/app/ios/App && pod install
+      - name: Appliquer les profils de signature
+        # À faire APRÈS pod install : CocoaPods réécrit le projet Xcode et efface la signature.
+        script: |
+          cd infra/ios/app/ios/App && xcode-project use-profiles
+      - name: Numéro de build depuis TestFlight
+        script: |
+          DERNIER=$(app-store-connect get-latest-testflight-build-number "$APP_ID" 2>/dev/null || echo 0)
+          N=$((DERNIER + 1))
+          cd infra/ios/app/ios/App && agvtool new-version -all "$N"
+          echo "build number retenu : $N (dernier TestFlight : $DERNIER)"
       - name: Build IPA
         script: |
-          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+          ( cd infra/ios/app/ios/App && xcode-project use-profiles )
+          xcode-project build-ipa \
+            --workspace "infra/ios/app/ios/App/App.xcworkspace" \
+            --scheme "App"
     artifacts:
       - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true    # pas de soumission App Store auto : validation humaine (règle §2.6)
+        submit_to_testflight: true
