@@ -1,0 +1,161 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../data/auth.dart';
+
+enum AuthMode { signup, login }
+
+class AuthScreen extends ConsumerStatefulWidget {
+  final AuthMode mode;
+  const AuthScreen({super.key, required this.mode});
+  @override
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  late AuthMode _mode = widget.mode;
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _prenom = TextEditingController();
+  final _nom = TextEditingController();
+  final _tel = TextEditingController();
+  bool _marketing = false;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    _prenom.dispose();
+    _nom.dispose();
+    _tel.dispose();
+    super.dispose();
+  }
+
+  bool get _isSignup => _mode == AuthMode.signup;
+
+  Future<void> _submit() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final actions = ref.read(authActionsProvider);
+      if (_isSignup) {
+        if (_prenom.text.trim().isEmpty) throw 'Votre prénom est requis.';
+        await actions.signUp(
+          email: _email.text.trim(),
+          password: _password.text,
+          prenom: _prenom.text.trim(),
+          nom: _nom.text.trim(),
+          telephone: _tel.text.trim(),
+          marketing: _marketing,
+        );
+      } else {
+        await actions.signIn(email: _email.text.trim(), password: _password.text);
+      }
+      if (mounted && (ref.read(currentUserProvider) != null)) {
+        Navigator.of(context).pop();
+      } else if (mounted && _isSignup) {
+        // Si confirmation e-mail requise, pas de session immédiate.
+        setState(() => _error = 'Compte créé. Vérifiez vos e-mails si une confirmation est demandée, puis connectez-vous.');
+      }
+    } catch (e) {
+      setState(() => _error = e is String ? e : _pretty(e.toString()));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  String _pretty(String raw) {
+    if (raw.contains('Invalid login')) return 'E-mail ou mot de passe incorrect.';
+    if (raw.contains('already registered')) return 'Un compte existe déjà avec cet e-mail.';
+    if (raw.contains('Password should')) return 'Mot de passe trop court (6 caractères minimum).';
+    return 'Une erreur est survenue. Réessayez.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Scaffold(
+      backgroundColor: AppColors.cream,
+      appBar: AppBar(
+        backgroundColor: AppColors.cream,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: AppColors.greenDeep,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.s24, 0, AppSpacing.s24, AppSpacing.s24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(_isSignup ? 'Créer mon compte' : 'Connexion',
+                  style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
+              const SizedBox(height: AppSpacing.s24),
+              if (_isSignup) ...[
+                _field(_prenom, 'Prénom', TextInputType.name),
+                _field(_nom, 'Nom (facultatif)', TextInputType.name),
+              ],
+              _field(_email, 'E-mail', TextInputType.emailAddress),
+              _field(_password, 'Mot de passe', TextInputType.visiblePassword, obscure: true),
+              if (_isSignup) ...[
+                _field(_tel, 'Téléphone (facultatif)', TextInputType.phone),
+                const SizedBox(height: AppSpacing.s8),
+                CheckboxListTile(
+                  value: _marketing,
+                  onChanged: (v) => setState(() => _marketing = v ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.green,
+                  title: Text('Je souhaite recevoir les recettes et nouveautés par e-mail.', style: t.textTheme.bodyMedium),
+                ),
+              ],
+              if (_error != null) ...[
+                const SizedBox(height: AppSpacing.s8),
+                Text(_error!, style: t.textTheme.bodyMedium?.copyWith(color: AppColors.danger)),
+              ],
+              const SizedBox(height: AppSpacing.s24),
+              FilledButton(
+                onPressed: _busy ? null : _submit,
+                child: _busy
+                    ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Text(_isSignup ? 'Créer mon compte' : 'Se connecter'),
+              ),
+              const SizedBox(height: AppSpacing.s16),
+              TextButton(
+                onPressed: _busy ? null : () => setState(() { _mode = _isSignup ? AuthMode.login : AuthMode.signup; _error = null; }),
+                child: Text(
+                  _isSignup ? 'J’ai déjà un compte' : 'Créer un compte',
+                  style: t.textTheme.labelLarge?.copyWith(color: AppColors.green),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _field(TextEditingController c, String label, TextInputType kind, {bool obscure = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.s16),
+      child: TextField(
+        controller: c,
+        keyboardType: kind,
+        obscureText: obscure,
+        style: Theme.of(context).textTheme.bodyLarge,
+        decoration: InputDecoration(
+          labelText: label,
+          filled: true,
+          fillColor: AppColors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.r16), borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.r16), borderSide: const BorderSide(color: AppColors.green)),
+        ),
+      ),
+    );
+  }
+}

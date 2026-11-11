@@ -1,20 +1,18 @@
-# Build iOS (macOS cloud) pour Ô Forneau ! — wrapper Capacitor autour de la PWA.
+# Build iOS (macOS cloud) pour Ô Forneau ! — application NATIVE Flutter (dossier app/).
 # Ce fichier DOIT être à la racine du dépôt (seul endroit où Codemagic le cherche).
 #
-# À faire UNE fois dans l'UI Codemagic avant le 1er build :
-#   - Groupe de variables « forneau_ios » avec :
-#       CERT_KEY_B64 : clé privée RSA (PEM) en base64 sur UNE ligne (la même que Smart Watches ;
-#                      sans elle, fetch-signing-files --create échoue et la signature est vide).
-#   - L'intégration App Store Connect « smartwatches » est réutilisée (même compte Apple) — rien à refaire.
+# Prérequis UI Codemagic (déjà en place) :
+#   - Groupe de variables « forneau_ios » avec CERT_KEY_B64 (clé privée RSA PEM en base64, une ligne).
+#   - Intégration App Store Connect « smartwatches » (même compte Apple).
 workflows:
   ios-release:
-    name: Ô Forneau ! — iOS TestFlight
+    name: Ô Forneau ! — iOS natif → TestFlight
     instance_type: mac_mini_m2
-    max_build_duration: 60
+    max_build_duration: 90
     integrations:
       app_store_connect: smartwatches
     environment:
-      node: 20
+      flutter: stable
       xcode: latest
       cocoapods: default
       groups: [forneau_ios]
@@ -33,30 +31,25 @@ workflows:
             --create
           keychain initialize
           keychain add-certificates
-      - name: Générer le wrapper Capacitor
+      - name: Dépendances Flutter
         script: |
-          cd infra/ios && bash setup-capacitor.sh
-      - name: Installer les pods
+          cd app && flutter packages pub get
+      - name: Pods iOS
         script: |
-          cd infra/ios/app/ios/App && pod install
+          cd app/ios && pod install
       - name: Appliquer les profils de signature
-        # À faire APRÈS pod install : CocoaPods réécrit le projet Xcode et efface la signature.
         script: |
-          cd infra/ios/app/ios/App && xcode-project use-profiles
-      - name: Numéro de build depuis TestFlight
+          cd app/ios && xcode-project use-profiles
+      - name: Build IPA
         script: |
           DERNIER=$(app-store-connect get-latest-testflight-build-number "$APP_ID" 2>/dev/null || echo 0)
           N=$((DERNIER + 1))
-          cd infra/ios/app/ios/App && agvtool new-version -all "$N"
           echo "build number retenu : $N (dernier TestFlight : $DERNIER)"
-      - name: Build IPA
-        script: |
-          ( cd infra/ios/app/ios/App && xcode-project use-profiles )
-          xcode-project build-ipa \
-            --workspace "infra/ios/app/ios/App/App.xcworkspace" \
-            --scheme "App"
+          cd app && flutter build ipa --release \
+            --build-name=1.1.0 --build-number="$N" \
+            --export-options-plist=/Users/builder/export_options.plist
     artifacts:
-      - build/ios/ipa/*.ipa
+      - app/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
