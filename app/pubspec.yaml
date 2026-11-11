@@ -1,7 +1,7 @@
 name: o_forneau
 description: "Ô Forneau ! — l'app qui dit quoi cuisiner ce soir, avec ce qu'on a."
 publish_to: 'none'
-version: 1.1.1+4
+version: 1.1.2+5
 
 environment:
   sdk: '>=3.4.0 <4.0.0'

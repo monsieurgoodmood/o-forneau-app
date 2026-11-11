@@ -1,4 +1,4 @@
-package com.maisonforneau.o_forneau
+package com.maisonforneau.oforneau
 
 import io.flutter.embedding.android.FlutterActivity
 
