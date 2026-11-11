@@ -36,7 +36,9 @@ workflows:
           cd app && flutter packages pub get
       - name: Pods iOS
         script: |
-          cd app/ios && pod install
+          # Génère Generated.xcconfig / la config Xcode (sans compiler), puis installe les pods.
+          cd app && flutter build ios --release --no-codesign --config-only
+          cd ios && pod install --repo-update
       - name: Appliquer les profils de signature
         script: |
           cd app/ios && xcode-project use-profiles
