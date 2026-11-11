@@ -112,7 +112,7 @@ class ProgrammeScreen extends ConsumerWidget {
               for (final e in kDietPlans.entries) ...[
                 ChoiceCard(
                   icon: Icons.eco_outlined,
-                  label: e.value.label, sub: 'P${e.value.p} · L${e.value.l} · G${e.value.g}', on: me.diet == e.key,
+                  label: e.value.label, sub: e.value.desc, on: me.diet == e.key,
                   onTap: () => setProg(prog.copyWith(me: me.copyWith(diet: e.key))),
                 ),
                 const SizedBox(width: AppSpacing.s16),
@@ -128,10 +128,12 @@ class ProgrammeScreen extends ConsumerWidget {
               Text('Objectif ${target.kcal} kcal/jour', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
               const SizedBox(height: AppSpacing.s8),
               Row(children: [
-                _Macro('Protéines', '${target.p} g'),
-                _Macro('Lipides', '${target.l} g'),
-                _Macro('Glucides', '${target.g} g'),
+                _Macro('Protéines', '${target.p} g', 'muscles'),
+                _Macro('Lipides', '${target.l} g', 'bons gras'),
+                _Macro('Glucides', '${target.g} g', 'énergie'),
               ]),
+              const SizedBox(height: AppSpacing.s8),
+              Text('Répartition : ${target.plan.p} % protéines · ${target.plan.l} % lipides · ${target.plan.g} % glucides de vos calories.', style: t.textTheme.labelSmall),
             ]),
           ),
           const SizedBox(height: AppSpacing.s24),
@@ -173,13 +175,14 @@ class ProgrammeScreen extends ConsumerWidget {
 }
 
 class _Macro extends StatelessWidget {
-  final String l, v;
-  const _Macro(this.l, this.v);
+  final String l, v, hint;
+  const _Macro(this.l, this.v, this.hint);
   @override
   Widget build(BuildContext context) => Expanded(
         child: Column(children: [
           Text(v, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
-          Text(l, style: Theme.of(context).textTheme.labelSmall),
+          Text(l, style: Theme.of(context).textTheme.labelMedium),
+          Text(hint, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.gold)),
         ]),
       );
 }

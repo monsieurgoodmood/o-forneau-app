@@ -48,7 +48,7 @@ workflows:
           N=$((DERNIER + 1))
           echo "build number retenu : $N (dernier TestFlight : $DERNIER)"
           cd app && flutter build ipa --release \
-            --build-name=1.1.0 --build-number="$N" \
+            --build-name=1.1.1 --build-number="$N" \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - app/build/ios/ipa/*.ipa

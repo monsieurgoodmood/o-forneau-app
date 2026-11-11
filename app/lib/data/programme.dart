@@ -24,19 +24,20 @@ const Map<String, Goal> kGoals = {
 
 class DietPlan {
   final String label;
-  final int p, l, g; // % des kcal
+  final String desc; // en français clair, pas de « P/L/G »
+  final int p, l, g; // % des kcal (protéines, lipides, glucides)
   final String? filter;
-  const DietPlan(this.label, this.p, this.l, this.g, [this.filter]);
+  const DietPlan(this.label, this.desc, this.p, this.l, this.g, [this.filter]);
 }
 
 const Map<String, DietPlan> kDietPlans = {
-  'equilibre': DietPlan('Équilibré', 25, 30, 45),
-  'proteine': DietPlan('Hyperprotéiné', 40, 25, 35, 'proteine'),
-  'lowcarb': DietPlan('Low carb', 30, 45, 25, 'lowcarb'),
-  'keto': DietPlan('Keto', 25, 70, 5, 'keto'),
-  'mediterraneen': DietPlan('Méditerranéen', 20, 35, 45),
-  'vegetarien': DietPlan('Végétarien', 22, 30, 48, 'vegetarien'),
-  'vegan': DietPlan('100 % végétal', 20, 30, 50, 'vegan'),
+  'equilibre': DietPlan('Équilibré', 'Un peu de tout, sans excès', 25, 30, 45),
+  'proteine': DietPlan('Hyperprotéiné', 'Plus de protéines, pour le muscle', 40, 25, 35, 'proteine'),
+  'lowcarb': DietPlan('Low carb', 'Moins de féculents et de sucres', 30, 45, 25, 'lowcarb'),
+  'keto': DietPlan('Keto', 'Très peu de glucides, plus de bons gras', 25, 70, 5, 'keto'),
+  'mediterraneen': DietPlan('Méditerranéen', 'Huile d’olive, légumes, poisson', 20, 35, 45),
+  'vegetarien': DietPlan('Végétarien', 'Sans viande ni poisson', 22, 30, 48, 'vegetarien'),
+  'vegan': DietPlan('100 % végétal', 'Sans aucun produit animal', 20, 30, 50, 'vegan'),
 };
 
 class Activity {
