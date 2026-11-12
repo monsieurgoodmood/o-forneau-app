@@ -10,6 +10,7 @@ import '../../data/programme.dart';
 import '../../data/recipe.dart';
 import '../../data/recipes_repository.dart';
 import '../frigo/frigo_screen.dart';
+import '../acces/paywall_screen.dart';
 import '../programme/foyer_screen.dart';
 import '../programme/programme_screen.dart';
 
@@ -118,9 +119,17 @@ class HomeScreen extends ConsumerWidget {
 
           // Menu
           _MenuCard(icon: 'ic-assistant', title: 'Trouver une recette', desc: 'Toutes les recettes, filtrées comme vous voulez.', featured: true, onTap: () => context.go('/')),
-          _MenuCard(icon: 'ic-programme', title: 'Mon programme nutritionnel', desc: 'Un objectif, une journée de repas équilibrée.', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgrammeScreen()))),
+          _MenuCard(icon: 'ic-programme', title: 'Mon programme nutritionnel', desc: 'Un objectif, une journée de repas équilibrée.', onTap: () async {
+            if (!await exigerPremium(context, ref, fonction: 'Le programme nutritionnel')) return;
+            if (!context.mounted) return;
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgrammeScreen()));
+          }),
           _MenuCard(icon: 'ic-foyer', title: 'Pour qui je cuisine ?', desc: 'Solo ou famille — quantités et nutrition adaptées.', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FoyerScreen()))),
-          _MenuCard(icon: 'ic-frigo', title: 'Cuisiner avec mon frigo', desc: 'Ce que vous pouvez faire, avec ce que vous avez.', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FrigoScreen()))),
+          _MenuCard(icon: 'ic-frigo', title: 'Cuisiner avec mon frigo', desc: 'Ce que vous pouvez faire, avec ce que vous avez.', onTap: () async {
+            if (!await exigerPremium(context, ref, fonction: 'Cuisiner avec mon frigo')) return;
+            if (!context.mounted) return;
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FrigoScreen()));
+          }),
         ],
       ),
     );

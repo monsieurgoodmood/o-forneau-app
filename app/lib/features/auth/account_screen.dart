@@ -4,8 +4,68 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/acces.dart';
 import '../../data/auth.dart';
+import '../acces/claim_order_screen.dart';
+import '../acces/paywall_screen.dart';
 import 'auth_screen.dart';
+
+/// Bloc « votre accès » : état courant et action adaptée.
+class _CarteAcces extends ConsumerWidget {
+  const _CarteAcces();
+
+  static String _date(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = Theme.of(context);
+    final a = ref.watch(accesProvider).asData?.value ?? Acces.aucun;
+
+    final (titre, detail, cta) = switch (a) {
+      _ when a.actif && a.estClient => (
+          'Accès client actif',
+          'Ouvert jusqu’au ${_date(a.expiresAt!)}. Chaque nouvelle commande le repousse, jusqu’à 12 mois.',
+          null),
+      _ when a.actif && a.estAbonne => (
+          'Abonnement actif',
+          'Résiliable à tout moment depuis votre compte Apple ou Google.',
+          null),
+      _ when a.actif && a.estEssai => (
+          'Essai en cours',
+          'Il vous reste ${a.joursRestants} jour${a.joursRestants > 1 ? 's' : ''}. Vous avez commandé chez Forneau ? Activez votre accès offert.',
+          'Activer mon accès offert'),
+      _ => (
+          'Accès limité',
+          'Vous pouvez parcourir toutes les recettes. Les fonctions premium demandent un accès.',
+          'Voir les options'),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(
+        color: a.actif ? AppColors.greenSoft : AppColors.cardBg,
+        borderRadius: BorderRadius.circular(AppRadius.r16),
+        border: Border.all(color: a.actif ? AppColors.green.withValues(alpha: 0.3) : AppColors.line),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('VOTRE ACCÈS', style: AppTypography.eyebrow(AppColors.gold)),
+        const SizedBox(height: 4),
+        Text(titre, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
+        const SizedBox(height: 4),
+        Text(detail, style: t.textTheme.bodyMedium),
+        if (cta != null) ...[
+          const SizedBox(height: AppSpacing.s16),
+          FilledButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => cta.startsWith('Activer') ? const ClaimOrderScreen() : const PaywallScreen())),
+            child: Text(cta),
+          ),
+        ],
+      ]),
+    );
+  }
+}
 
 /// Mon compte — profil, déconnexion, suppression (page légale exigée par Play/Apple), confidentialité.
 class AccountScreen extends ConsumerWidget {
@@ -48,6 +108,8 @@ class AccountScreen extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(user.email ?? '', style: t.textTheme.bodyMedium),
             const SizedBox(height: AppSpacing.s24),
+            const _CarteAcces(),
+            const SizedBox(height: AppSpacing.s16),
             Container(
               padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),

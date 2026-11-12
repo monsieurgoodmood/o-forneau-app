@@ -14,6 +14,7 @@ import 'favorites_screen.dart';
 import '../programme/programme_screen.dart';
 import '../home/home_screen.dart';
 import '../auth/account_screen.dart';
+import '../acces/paywall_screen.dart';
 
 /// Accueil « Les recettes » — réplique du web (crème, wordmark, cartes éditoriales).
 class RecipesListScreen extends ConsumerWidget {
@@ -403,11 +404,11 @@ class RecipeCard extends ConsumerWidget {
   }
 }
 
-class _BottomNav extends StatelessWidget {
+class _BottomNav extends ConsumerWidget {
   final int current;
   const _BottomNav({required this.current});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NavigationBarTheme(
       data: NavigationBarThemeData(
         backgroundColor: AppColors.creamTop,
@@ -424,7 +425,11 @@ class _BottomNav extends StatelessWidget {
             return;
           }
           if (i == 2) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgrammeScreen()));
+            () async {
+              if (!await exigerPremium(context, ref, fonction: 'Le programme nutritionnel')) return;
+              if (!context.mounted) return;
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgrammeScreen()));
+            }();
             return;
           }
           if (i == 0) {

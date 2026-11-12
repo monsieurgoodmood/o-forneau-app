@@ -13,6 +13,7 @@ import '../../data/recipes_repository.dart';
 import 'cook_mode_screen.dart';
 import 'reviews_section.dart';
 import '../frigo/courses_screen.dart';
+import '../acces/paywall_screen.dart';
 
 /// Fiche recette — réplique du web (hero, pastilles, bloc ustensile Forneau, Mode cuisine).
 class RecipeDetailScreen extends ConsumerStatefulWidget {
@@ -130,7 +131,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _CookBar(recipe: recipe),
+      bottomNavigationBar: _CookBar(recipe: recipe, ref: ref),
     );
   }
 }
@@ -406,7 +407,8 @@ class _MacrosRow extends StatelessWidget {
 
 class _CookBar extends StatelessWidget {
   final Recipe recipe;
-  const _CookBar({required this.recipe});
+  final WidgetRef ref;
+  const _CookBar({required this.recipe, required this.ref});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -420,7 +422,11 @@ class _CookBar extends StatelessWidget {
             elevation: 1,
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CoursesScreen())),
+              onTap: () async {
+                if (!await exigerPremium(context, ref, fonction: 'La liste de courses')) return;
+                if (!context.mounted) return;
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CoursesScreen()));
+              },
               child: const Padding(padding: EdgeInsets.all(14), child: Icon(Icons.shopping_basket_outlined, color: AppColors.green)),
             ),
           ),
@@ -429,7 +435,12 @@ class _CookBar extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: recipe.steps.isEmpty
                   ? null
-                  : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CookModeScreen(recipe: recipe))),
+                  : () async {
+                      // Le mode cuisine (et son pilotage vocal) fait partie des fonctions premium.
+                      if (!await exigerPremium(context, ref, fonction: 'Le mode cuisine')) return;
+                      if (!context.mounted) return;
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => CookModeScreen(recipe: recipe)));
+                    },
               icon: const Icon(Icons.play_arrow),
               label: const Text('Mode cuisine'),
             ),
