@@ -7,7 +7,13 @@ import '../../data/acces.dart';
 import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
 
-/// « J'ai commandé chez Forneau » — débloque 12 mois contre un numéro de commande + l'e-mail d'achat.
+/// Mode vitrine : rend l'écran comme pour un utilisateur connecté, afin de produire les
+/// captures exigées par la revue des stores. Sans `--dart-define=VITRINE=true` la constante
+/// vaut false et le code est élagué des binaires publiés.
+const _vitrine = bool.fromEnvironment('VITRINE');
+
+/// « J'ai commandé chez Forneau » — débloque de 1 à 12 mois selon le montant de la commande,
+/// contre un numéro de commande et l'e-mail d'achat.
 class ClaimOrderScreen extends ConsumerStatefulWidget {
   const ClaimOrderScreen({super.key});
   @override
@@ -26,7 +32,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
   void initState() {
     super.initState();
     // Pré-remplir avec l'e-mail du compte : c'est souvent le même que celui de la commande.
-    _email.text = ref.read(currentUserProvider)?.email ?? '';
+    _email.text = _vitrine ? '' : (ref.read(currentUserProvider)?.email ?? '');
   }
 
   @override
@@ -59,7 +65,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final user = ref.watch(currentUserProvider);
+    final connecte = _vitrine || ref.watch(currentUserProvider) != null;
     final margin = AppSpacing.screenMargin(MediaQuery.sizeOf(context).width);
 
     return Scaffold(
@@ -97,10 +103,10 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
                 FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Commencer à cuisiner')),
               ]),
             ),
-          ] else if (user == null) ...[
+          ] else if (!connecte) ...[
             Text('Créez votre compte', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: AppSpacing.s8),
-            Text('Vos 12 mois sont rattachés à un compte, pour vous suivre sur tous vos appareils.',
+            Text('Vos mois offerts sont rattachés à un compte, pour vous suivre sur tous vos appareils.',
                 style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
             const SizedBox(height: AppSpacing.s24),
             FilledButton(

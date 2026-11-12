@@ -20,12 +20,23 @@ Future<void> main() async {
         ),
       );
 
+  // Aucune initialisation ne doit pouvoir retenir la première image : un await qui ne
+  // revient jamais donnerait un écran blanc muet, sans erreur à lire. On borne les deux,
+  // et on démarre en mode dégradé plutôt que de ne pas démarrer du tout.
+  const limite = Duration(seconds: 8);
   try {
-    await initSupabase();
+    await initSupabase().timeout(limite);
   } catch (e) {
     debugPrint('Supabase init échoué (mode dégradé) : $e');
   }
-  final prefs = await SharedPreferences.getInstance();
+  SharedPreferences prefs;
+  try {
+    prefs = await SharedPreferences.getInstance().timeout(limite);
+  } catch (e) {
+    debugPrint('SharedPreferences indisponible, réglages en mémoire : $e');
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
+  }
   runApp(
     ProviderScope(
       overrides: [prefsProvider.overrideWithValue(prefs)],

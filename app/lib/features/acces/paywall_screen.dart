@@ -9,6 +9,11 @@ import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
 import 'claim_order_screen.dart';
 
+/// Mode vitrine : rend l'écran comme pour un utilisateur connecté, afin de produire les
+/// captures exigées par la revue des stores. Sans `--dart-define=VITRINE=true` la constante
+/// vaut false et le code est élagué des binaires publiés.
+const _vitrine = bool.fromEnvironment('VITRINE');
+
 /// Écran d'abonnement. Trois voies, dans cet ordre d'intérêt pour le client :
 /// 1. il a commandé chez Forneau → 12 mois offerts ;
 /// 2. il n'a jamais essayé → 1 mois offert, sans carte ;
@@ -58,7 +63,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final user = ref.watch(currentUserProvider);
+    final connecte = _vitrine || ref.watch(currentUserProvider) != null;
     final acces = ref.watch(accesProvider).asData?.value ?? Acces.aucun;
     final essaiDejaPris = acces.estEssai; // un essai déjà posé (même expiré) reste visible
     final margin = AppSpacing.screenMargin(MediaQuery.sizeOf(context).width);
@@ -99,7 +104,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               const SizedBox(height: 4),
               Text('Jusqu’à 12 mois offerts', style: t.textTheme.headlineMedium?.copyWith(color: AppColors.greenDeep)),
               const SizedBox(height: 4),
-              Text('Selon le montant de votre commande : 3 mois dès 70 €, 6 mois dès 100 €, 12 mois dès 150 €. Renouvelés à chaque commande.',
+              Text('Selon le montant de votre commande : 1 mois pour toute commande, 3 mois dès 70 €, '
+                  '6 mois dès 100 €, 12 mois dès 150 €. Renouvelés à chaque commande.',
                   style: t.textTheme.bodyMedium),
               const SizedBox(height: AppSpacing.s16),
               FilledButton(
@@ -117,7 +123,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           const SizedBox(height: AppSpacing.s24),
 
           // 2) Essai gratuit
-          if (user != null && !essaiDejaPris) ...[
+          if (connecte && !essaiDejaPris) ...[
             OutlinedButton(
               onPressed: _busy ? null : _essai,
               style: OutlinedButton.styleFrom(
@@ -137,7 +143,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           // 3) Abonnement
           Text('S’ABONNER', style: AppTypography.eyebrow(AppColors.gold)),
           const SizedBox(height: AppSpacing.s8),
-          if (user == null)
+          if (!connecte)
             _carteInfo(t, 'Créez un compte pour vous abonner et retrouver votre accès sur tous vos appareils.',
                 'Créer mon compte',
                 () => Navigator.of(context).push(

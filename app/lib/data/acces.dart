@@ -149,7 +149,36 @@ class AccesActions {
 
   // ---------- Abonnement (RevenueCat : Apple IAP + Google Play Billing) ----------
 
+  /// Mode vitrine : affiche les forfaits aux tarifs réels sans interroger les boutiques.
+  /// Sert uniquement à produire les captures exigées par la revue des stores, là où aucun
+  /// achat intégré n'existe (rendu web, machine de build). Absent des binaires publiés :
+  /// la constante vaut false sans `--dart-define=VITRINE=true`, et l'arbre mort est élagué.
+  static const _vitrine = bool.fromEnvironment('VITRINE');
+
+  List<rc.Package> _forfaitsVitrine() => [
+        _paquetVitrine('\$rc_monthly', 'MONTHLY', 'premium_monthly', 3.99, '3,99 €', 'P1M'),
+        _paquetVitrine('\$rc_annual', 'ANNUAL', 'premium_yearly', 24.99, '24,99 €', 'P1Y'),
+      ];
+
+  rc.Package _paquetVitrine(String id, String type, String sku, double prix, String prixTexte, String periode) =>
+      rc.Package.fromJson({
+        'identifier': id,
+        'packageType': type,
+        'presentedOfferingContext': {'offeringIdentifier': 'default', 'placementIdentifier': null, 'targetingContext': null},
+        'product': {
+          'identifier': sku,
+          'title': 'Ô Forneau Premium',
+          'description': 'Accès à toutes les fonctions de cuisine',
+          'price': prix,
+          'priceString': prixTexte,
+          'currencyCode': 'EUR',
+          'productCategory': 'SUBSCRIPTION',
+          'subscriptionPeriod': periode,
+        },
+      });
+
   Future<List<rc.Package>> forfaits() async {
+    if (_vitrine) return _forfaitsVitrine();
     if (!RevenueCat.disponible) return const [];
     try {
       final current = (await rc.Purchases.getOfferings()).current;
