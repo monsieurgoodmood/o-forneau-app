@@ -177,7 +177,7 @@ class AccesActions {
   /// Achat. Renvoie null si l'accès est actif ensuite, sinon un message (null aussi si annulé).
   Future<String?> acheter(rc.Package p) async {
     try {
-      await rc.Purchases.purchasePackage(p);
+      await rc.Purchases.purchase(rc.PurchaseParams.package(p));
       await _rafraichir();
       return null;
     } on PlatformException catch (e) {

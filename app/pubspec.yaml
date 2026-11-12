@@ -1,7 +1,7 @@
 name: o_forneau
 description: "Ô Forneau ! — l'app qui dit quoi cuisiner ce soir, avec ce qu'on a."
 publish_to: 'none'
-version: 1.2.2+8
+version: 1.2.3+9
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -17,7 +17,7 @@ dependencies:
   supabase_flutter: ^2.8.0
   shared_preferences: ^2.3.2
   image_picker: ^1.1.2
-  purchases_flutter: ^8.10.0
+  purchases_flutter: ^11.0.1
   speech_to_text: ^7.0.0
   flutter_tts: ^4.2.0
   wakelock_plus: ^1.2.8
