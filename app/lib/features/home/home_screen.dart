@@ -11,6 +11,8 @@ import '../../data/recipe.dart';
 import '../../data/recipes_repository.dart';
 import '../frigo/frigo_screen.dart';
 import '../acces/paywall_screen.dart';
+import '../auth/exiger_compte.dart';
+import '../createurs/createurs_screen.dart';
 import '../programme/foyer_screen.dart';
 import '../programme/programme_screen.dart';
 
@@ -129,6 +131,11 @@ class HomeScreen extends ConsumerWidget {
             if (!await exigerPremium(context, ref, fonction: 'Cuisiner avec mon frigo')) return;
             if (!context.mounted) return;
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FrigoScreen()));
+          }),
+          _MenuCard(icon: 'ic-assistant', title: 'Mes créateurs préférés', desc: 'Dites-nous qui suivre, on va chercher leurs recettes.', onTap: () async {
+            if (!await exigerCompte(context, ref, fonction: 'Proposer un créateur')) return;
+            if (!context.mounted) return;
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateursScreen()));
           }),
         ],
       ),

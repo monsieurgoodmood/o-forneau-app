@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/acces.dart';
 import '../../data/auth.dart';
+import '../createurs/createurs_screen.dart';
 import '../acces/claim_order_screen.dart';
 import '../acces/paywall_screen.dart';
 import 'auth_screen.dart';
@@ -114,6 +115,13 @@ class AccountScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
               child: Text('Vos favoris, votre frigo, votre liste de courses, votre programme et votre foyer sont synchronisés avec ce compte (données hébergées en Europe).', style: t.textTheme.bodyLarge),
+            ),
+            const SizedBox(height: AppSpacing.s16),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateursScreen())),
+              style: OutlinedButton.styleFrom(foregroundColor: AppColors.green, side: const BorderSide(color: AppColors.green), minimumSize: const Size(0, 52), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
+              icon: const Icon(Icons.auto_awesome_outlined),
+              label: const Text('Mes créateurs préférés'),
             ),
             const SizedBox(height: AppSpacing.s24),
             OutlinedButton.icon(

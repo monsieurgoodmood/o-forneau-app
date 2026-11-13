@@ -7,6 +7,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/acces.dart';
 import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
+import '../auth/exiger_compte.dart';
 import 'claim_order_screen.dart';
 
 /// Mode vitrine : rend l'écran comme pour un utilisateur connecté, afin de produire les
@@ -260,9 +261,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       );
 }
 
-/// Porte d'accès aux fonctions premium : renvoie true si l'accès est ouvert,
-/// sinon présente l'écran d'abonnement et renvoie le résultat.
+/// Porte d'accès aux fonctions premium, en deux temps.
+///
+/// 1. Pas de compte → invitation à en créer un. L'accès est rattaché à un compte :
+///    un invité ne peut rien activer, donc inutile de lui parler d'abonnement d'abord.
+/// 2. Compte sans accès → écran d'abonnement.
+///
+/// Renvoie true si la fonction peut s'ouvrir.
 Future<bool> exigerPremium(BuildContext context, WidgetRef ref, {String fonction = ''}) async {
+  if (!await exigerCompte(context, ref, fonction: fonction)) return false;
   if (ref.read(estPremiumProvider)) return true;
   await ref.read(accesProvider.future); // s'assurer d'avoir la dernière vérité serveur
   if (ref.read(estPremiumProvider)) return true;

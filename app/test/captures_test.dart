@@ -27,6 +27,8 @@ import 'package:o_forneau/data/auth.dart';
 import 'package:o_forneau/data/supabase_client.dart';
 import 'package:o_forneau/features/acces/claim_order_screen.dart';
 import 'package:o_forneau/features/acces/paywall_screen.dart';
+import 'package:o_forneau/features/auth/exiger_compte.dart';
+import 'package:o_forneau/features/createurs/createurs_screen.dart';
 
 const _largeur = 390.0; // iPhone 14/15
 const _densite = 3.0;
@@ -106,6 +108,15 @@ void main() {
   testWidgets('abonnement-forfaits', (tester) async {
     await _capturer(tester, const PaywallScreen(fonction: 'Le mode cuisine'), 'abonnement-forfaits',
         defilement: 620);
+  });
+
+  testWidgets('compte', (tester) async {
+    await _capturer(tester, const InvitationCompteScreen(fonction: 'Le mode cuisine'), 'compte',
+        hauteur: 1000);
+  });
+
+  testWidgets('createurs', (tester) async {
+    await _capturer(tester, const CreateursScreen(), 'createurs', hauteur: 1100);
   });
 
   testWidgets('commande', (tester) async {

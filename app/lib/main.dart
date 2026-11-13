@@ -20,21 +20,22 @@ Future<void> main() async {
         ),
       );
 
-  // Aucune initialisation ne doit pouvoir retenir la première image : un await qui ne
-  // revient jamais donnerait un écran blanc muet, sans erreur à lire. On borne les deux,
-  // et on démarre en mode dégradé plutôt que de ne pas démarrer du tout.
-  const limite = Duration(seconds: 8);
+  // L'initialisation de Supabase touche le réseau : sans borne de temps, un serveur
+  // injoignable retient la première image et l'utilisateur n'a qu'un écran blanc, sans
+  // rien à lire. On la borne et on démarre en mode dégradé plutôt que pas du tout —
+  // l'app redemandera une session dès qu'elle en aura besoin.
   try {
-    await initSupabase().timeout(limite);
+    await initSupabase().timeout(const Duration(seconds: 8));
   } catch (e) {
     debugPrint('Supabase init échoué (mode dégradé) : $e');
   }
+  // Les réglages locaux, eux, ne sortent pas de l'appareil : une lenteur est possible,
+  // une panne définitive non. On réessaie une fois avant de laisser l'erreur remonter.
   SharedPreferences prefs;
   try {
-    prefs = await SharedPreferences.getInstance().timeout(limite);
+    prefs = await SharedPreferences.getInstance().timeout(const Duration(seconds: 8));
   } catch (e) {
-    debugPrint('SharedPreferences indisponible, réglages en mémoire : $e');
-    SharedPreferences.setMockInitialValues({});
+    debugPrint('Réglages locaux lents, seconde tentative : $e');
     prefs = await SharedPreferences.getInstance();
   }
   runApp(
