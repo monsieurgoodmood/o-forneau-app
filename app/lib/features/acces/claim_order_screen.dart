@@ -151,7 +151,29 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
                   color: AppColors.white, borderRadius: BorderRadius.circular(AppRadius.r8),
                   border: Border.all(color: AppColors.danger.withValues(alpha: 0.4)),
                 ),
-                child: Text(_erreur!, style: t.textTheme.bodyMedium?.copyWith(color: AppColors.danger)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(_erreur!, style: t.textTheme.bodyMedium?.copyWith(color: AppColors.danger)),
+                  const SizedBox(height: AppSpacing.s8),
+                  // Le message serveur est volontairement identique que la commande
+                  // n'existe pas ou que l'e-mail diffère — sinon on permettrait de
+                  // deviner les numéros valides. Mais l'utilisateur de bonne foi reste
+                  // alors sans piste : on lui donne les trois causes réelles (A18).
+                  Text(
+                    'Trois choses à vérifier :\n'
+                    '• le numéro tel qu’il figure sur l’e-mail de confirmation, avec le #\n'
+                    '• l’adresse e-mail utilisée lors de l’achat, qui n’est pas forcément '
+                    'celle de ce compte\n'
+                    '• que la commande est bien payée, et qu’elle n’a pas déjà servi à '
+                    'ouvrir un autre compte',
+                    style: t.textTheme.labelSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.s8),
+                  Text(
+                    'Toujours bloqué ? Écrivez-nous à info@forneau.fr en indiquant votre '
+                    'numéro de commande : nous activons l’accès à la main.',
+                    style: t.textTheme.labelSmall?.copyWith(color: AppColors.muted),
+                  ),
+                ]),
               ),
             ],
             const SizedBox(height: AppSpacing.s24),

@@ -229,6 +229,49 @@ class AccesActions {
   }
 }
 
+/// Une commande Forneau qui a ouvert l'accès. Le ticket A18 demandait de montrer
+/// « la commande associée » : sans elle, l'utilisateur voit une échéance sans savoir
+/// d'où elle vient, et ne peut pas comprendre pourquoi un achat n'a rien changé.
+class CommandeReclamee {
+  final String numero;
+  final double? montant;
+  final int moisOfferts;
+  final DateTime reclameeLe;
+
+  const CommandeReclamee({
+    required this.numero,
+    required this.moisOfferts,
+    required this.reclameeLe,
+    this.montant,
+  });
+
+  factory CommandeReclamee.fromRow(Map<String, dynamic> r) => CommandeReclamee(
+        numero: r['order_name']?.toString() ?? '',
+        montant: (r['montant'] is num) ? (r['montant'] as num).toDouble() : null,
+        moisOfferts: (r['mois_offerts'] is num) ? (r['mois_offerts'] as num).toInt() : 0,
+        reclameeLe: DateTime.tryParse(r['claimed_at']?.toString() ?? '') ?? DateTime.now(),
+      );
+}
+
+/// Les commandes déjà réclamées par ce compte, de la plus récente à la plus ancienne.
+final mesCommandesProvider = FutureProvider<List<CommandeReclamee>>((ref) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return const [];
+  try {
+    final rows = await supabase
+        .from('commandes_reclamees')
+        .select('order_name,montant,mois_offerts,claimed_at')
+        .eq('user_id', user.id)
+        .order('claimed_at', ascending: false)
+        .limit(20);
+    return (rows as List)
+        .map((r) => CommandeReclamee.fromRow(Map<String, dynamic>.from(r as Map)))
+        .toList();
+  } catch (_) {
+    return const [];
+  }
+});
+
 final accesActionsProvider = Provider<AccesActions>((ref) => AccesActions(ref));
 
 /// Configuration RevenueCat. L'appUserID est l'UUID du compte Supabase : le webhook `rc-webhook`

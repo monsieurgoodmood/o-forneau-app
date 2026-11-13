@@ -56,6 +56,24 @@ class _CarteAcces extends ConsumerWidget {
         Text(titre, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
         const SizedBox(height: 4),
         Text(detail, style: t.textTheme.bodyMedium),
+        // D'ou vient cet acces. Sans cette ligne, on lit une echeance sans savoir quelle
+        // commande l'a ouverte, et on ne peut pas comprendre qu'un achat recent n'a rien
+        // change parce qu'il n'a pas ete reclame (ticket A18).
+        Consumer(builder: (context, ref2, _) {
+          final cmds = ref2.watch(mesCommandesProvider).asData?.value ?? const <CommandeReclamee>[];
+          if (cmds.isEmpty) return const SizedBox.shrink();
+          final derniere = cmds.first;
+          return Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.s8),
+            child: Text(
+              cmds.length == 1
+                  ? 'Ouvert par votre commande ${derniere.numero} (${derniere.moisOfferts} mois).'
+                  : 'Ouvert par votre commande ${derniere.numero} (${derniere.moisOfferts} mois), '
+                      'sur ${cmds.length} commandes activées.',
+              style: t.textTheme.labelSmall,
+            ),
+          );
+        }),
         if (cta != null) ...[
           const SizedBox(height: AppSpacing.s16),
           FilledButton(
