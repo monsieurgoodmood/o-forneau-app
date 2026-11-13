@@ -7,6 +7,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/auth.dart';
 import '../../data/community.dart';
 import '../auth/auth_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 const _crits = [('taste', 'Goût'), ('ease', 'Faisabilité'), ('visual', 'Visuel')];
 
@@ -36,14 +37,14 @@ class ReviewsSection extends ConsumerWidget {
               const SizedBox(width: 6),
               Text('(${stats.count} avis)', style: t.textTheme.labelSmall),
             ] else
-              Text('Soyez le premier à noter', style: t.textTheme.labelSmall),
+              Text(L.of(context).soyezLePremierANoter, style: t.textTheme.labelSmall),
           ],
         ),
         if (stats.count > 0) ...[
           const SizedBox(height: AppSpacing.s8),
           Wrap(spacing: AppSpacing.s16, runSpacing: 4, children: [
             _CritAvg('Goût', stats.avgTaste),
-            _CritAvg('Faisabilité', stats.avgEase),
+            _CritAvg(L.of(context).faisabilite, stats.avgEase),
             _CritAvg('Visuel', stats.avgVisual),
           ]),
         ],
@@ -85,9 +86,9 @@ class _SignInPrompt extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.s16),
       decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Notez cette recette, laissez un commentaire et partagez la photo de votre plat.', style: t.textTheme.bodyLarge),
+        Text(L.of(context).notezCetteRecetteLaissezUnCommentaire, style: t.textTheme.bodyLarge),
         const SizedBox(height: AppSpacing.s16),
-        FilledButton(onPressed: onTap, child: const Text('Créer mon compte ou me connecter')),
+        FilledButton(onPressed: onTap, child: Text(L.of(context).creerMonCompteOuMeConnecter)),
       ]),
     );
   }
@@ -123,10 +124,10 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
       if (mounted) {
         _body.clear();
         setState(() => _photo = null);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Merci, votre avis est publié.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L.of(context).merciVotreAvisEstPublie)));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Publication impossible. Réessayez.')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L.of(context).publicationImpossibleReessayez)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -153,7 +154,7 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
       padding: const EdgeInsets.all(AppSpacing.s16),
       decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('VOTRE AVIS', style: AppTypography.eyebrow(AppColors.gold)),
+        Text(L.of(context).votreAvis, style: AppTypography.eyebrow(AppColors.gold)),
         const SizedBox(height: AppSpacing.s8),
         for (final c in _crits)
           Padding(
@@ -179,7 +180,7 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
           onChanged: (_) => setState(() {}),
           style: t.textTheme.bodyLarge,
           decoration: InputDecoration(
-            hintText: 'Un commentaire ? (facultatif)',
+            hintText: L.of(context).unCommentaireFacultatif,
             counterText: '',
             filled: true,
             fillColor: AppColors.white,
@@ -208,7 +209,7 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
           onPressed: canSubmit ? _submit : null,
           child: _busy
               ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Publier mon avis'),
+              : Text(L.of(context).publierMonAvis),
         ),
       ]),
     );
@@ -231,7 +232,7 @@ class _PhotoGallery extends ConsumerWidget {
     if (photos.isEmpty) return const SizedBox.shrink();
     final me = ref.watch(currentUserProvider)?.id;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('LES PLATS DE LA COMMUNAUTÉ', style: AppTypography.eyebrow(AppColors.gold)),
+      Text(L.of(context).lesPlatsDeLaCommunaute, style: AppTypography.eyebrow(AppColors.gold)),
       const SizedBox(height: AppSpacing.s8),
       SizedBox(
         height: 120,
@@ -255,7 +256,7 @@ class _PhotoGallery extends ConsumerWidget {
       ),
       if (photos.first.author != null) ...[
         const SizedBox(height: 4),
-        Text('Touchez une photo pour l’agrandir.', style: t.textTheme.labelSmall),
+        Text(L.of(context).touchezUnePhotoPourLAgrandir, style: t.textTheme.labelSmall),
       ],
     ]);
   }
@@ -279,11 +280,11 @@ class _PhotoGallery extends ConsumerWidget {
               if (mine)
                 TextButton(
                   onPressed: () async { await ref.read(communityActionsProvider).deletePhoto(p.slug, p); if (context.mounted) Navigator.pop(context); },
-                  child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
+                  child: Text(L.of(context).supprimer, style: TextStyle(color: Colors.white)),
                 )
               else
                 TextButton(
-                  onPressed: () async { await ref.read(communityActionsProvider).reportPhoto(p.slug, p.id); if (context.mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo signalée. Merci.'))); } },
+                  onPressed: () async { await ref.read(communityActionsProvider).reportPhoto(p.slug, p.id); if (context.mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L.of(context).photoSignaleeMerci))); } },
                   child: const Text('Signaler', style: TextStyle(color: Colors.white70)),
                 ),
             ]),
@@ -307,7 +308,7 @@ class _CommentList extends ConsumerWidget {
     final me = ref.watch(currentUserProvider)?.id;
     if (comments.isEmpty) return const SizedBox.shrink();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('COMMENTAIRES', style: AppTypography.eyebrow(AppColors.gold)),
+      Text(L.of(context).commentaires, style: AppTypography.eyebrow(AppColors.gold)),
       const SizedBox(height: AppSpacing.s8),
       for (final c in comments)
         Container(
@@ -316,7 +317,7 @@ class _CommentList extends ConsumerWidget {
           decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Expanded(child: Text(c.author ?? 'Un gourmand', style: t.textTheme.labelLarge?.copyWith(color: AppColors.greenDeep))),
+              Expanded(child: Text(c.author ?? L.of(context).unGourmand, style: t.textTheme.labelLarge?.copyWith(color: AppColors.greenDeep))),
               Text(_date(c.createdAt), style: t.textTheme.labelSmall),
               PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
@@ -327,7 +328,7 @@ class _CommentList extends ConsumerWidget {
                   if (v == 'rep') { await a.reportComment(slug, c.id); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Commentaire signalé. Merci.'))); }
                 },
                 itemBuilder: (_) => [
-                  if (c.userId == me) const PopupMenuItem(value: 'del', child: Text('Supprimer'))
+                  if (c.userId == me) PopupMenuItem(value: 'del', child: Text(L.of(context).supprimer))
                   else const PopupMenuItem(value: 'rep', child: Text('Signaler')),
                 ],
               ),

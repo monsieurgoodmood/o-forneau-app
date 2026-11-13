@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/favorites.dart';
 import '../../data/recipes_repository.dart';
+import '../../l10n/app_localizations.dart';
 import 'recipes_list_screen.dart' show RecipeCard;
 
 /// Mes favoris — hors-ligne, synchronisés avec le compte quand connecté.
@@ -24,7 +25,7 @@ class FavoritesScreen extends ConsumerWidget {
         backgroundColor: AppColors.creamTop,
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
-        title: Text('Mes favoris', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
+        title: Text(L.of(context).mesFavoris, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
       ),
       body: list.isEmpty
           ? Center(
@@ -33,9 +34,9 @@ class FavoritesScreen extends ConsumerWidget {
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   const Icon(Icons.favorite_border, size: 40, color: AppColors.gold),
                   const SizedBox(height: AppSpacing.s16),
-                  Text('Aucun favori pour l’instant', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
+                  Text(L.of(context).aucunFavoriPourLInstant, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
                   const SizedBox(height: AppSpacing.s8),
-                  Text('Touchez le cœur sur une recette pour la retrouver ici.', textAlign: TextAlign.center, style: t.textTheme.bodyMedium),
+                  Text(L.of(context).touchezLeCUrSurUne, textAlign: TextAlign.center, style: t.textTheme.bodyMedium),
                 ]),
               ),
             )

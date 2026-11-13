@@ -9,13 +9,14 @@ import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
 import '../auth/exiger_compte.dart';
 import 'claim_order_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Mode vitrine : rend l'écran comme pour un utilisateur connecté, afin de produire les
 /// captures exigées par la revue des stores. Sans `--dart-define=VITRINE=true` la constante
 /// vaut false et le code est élagué des binaires publiés.
 const _vitrine = bool.fromEnvironment('VITRINE');
 
-/// Écran d'abonnement. Trois voies, dans cet ordre d'intérêt pour le client :
+/// Écran dL.of(context).abonnementTroisVoiesDansCetOrdreintérêt pour le client :
 /// 1. il a commandé chez Forneau → 12 mois offerts ;
 /// 2. il n'a jamais essayé → 1 mois offert, sans carte ;
 /// 3. sinon → abonnement mensuel ou annuel (achat intégré Apple / Google).
@@ -81,11 +82,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, 0, margin, AppSpacing.s32),
         children: [
-          Text('Ô FORNEAU PREMIUM', style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).oForneauPremium, style: AppTypography.eyebrow(AppColors.gold)),
           const SizedBox(height: AppSpacing.s8),
           Text(
             widget.fonction.isEmpty
-                ? 'Cuisinez accompagné'
+                ? L.of(context).cuisinezAccompagne
                 : '${widget.fonction} fait partie\ndes fonctions premium',
             style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep),
           ),
@@ -101,12 +102,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               border: Border.all(color: AppColors.green.withValues(alpha: 0.35)),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('VOUS AVEZ COMMANDÉ CHEZ FORNEAU ?', style: AppTypography.eyebrow(AppColors.gold)),
+              Text(L.of(context).vousAvezCommandeChezForneau, style: AppTypography.eyebrow(AppColors.gold)),
               const SizedBox(height: 4),
-              Text('Jusqu’à 12 mois offerts', style: t.textTheme.headlineMedium?.copyWith(color: AppColors.greenDeep)),
+              Text(L.of(context).jusquA12MoisOfferts2, style: t.textTheme.headlineMedium?.copyWith(color: AppColors.greenDeep)),
               const SizedBox(height: 4),
-              Text('Selon le montant de votre commande : 1 mois pour toute commande, 3 mois dès 70 €, '
-                  '6 mois dès 100 €, 12 mois dès 150 €. Renouvelés à chaque commande.',
+              Text(L.of(context).selonLeMontantDeVotreCommande,
                   style: t.textTheme.bodyMedium),
               const SizedBox(height: AppSpacing.s16),
               FilledButton(
@@ -117,7 +117,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   if (ref.read(estPremiumProvider)) Navigator.pop(context, true);
                   else if (ok == true) setState(() {});
                 },
-                child: const Text('J’ai commandé chez Forneau'),
+                child: Text(L.of(context).jAiCommandeChezForneau),
               ),
             ]),
           ),
@@ -133,28 +133,27 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                 textStyle: t.textTheme.titleMedium,
               ),
-              child: const Text('Essayer 1 mois gratuitement'),
+              child: Text(L.of(context).essayer1MoisGratuitement),
             ),
             const SizedBox(height: 6),
-            Text('Sans carte bancaire. Rien ne se déclenche à la fin.',
+            Text(L.of(context).sansCarteBancaireRienNeSe,
                 textAlign: TextAlign.center, style: t.textTheme.labelSmall),
             const SizedBox(height: AppSpacing.s24),
           ],
 
           // 3) Abonnement
-          Text('S’ABONNER', style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).sAbonner, style: AppTypography.eyebrow(AppColors.gold)),
           const SizedBox(height: AppSpacing.s8),
           if (!connecte)
-            _carteInfo(t, 'Créez un compte pour vous abonner et retrouver votre accès sur tous vos appareils.',
-                'Créer mon compte',
+            _carteInfo(t, L.of(context).creezUnComptePourVousAbonner,
+                L.of(context).creerMonCompte,
                 () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.signup))))
           else if (_chargement)
             const Padding(padding: EdgeInsets.all(AppSpacing.s16),
                 child: Center(child: CircularProgressIndicator(color: AppColors.green)))
           else if (_forfaits.isEmpty)
-            _carteInfo(t, 'L’abonnement n’est pas encore disponible sur cet appareil. '
-                'Vous pouvez activer vos 12 mois offerts si vous avez commandé chez Forneau.', null, null)
+            _carteInfo(t, L.of(context).lAbonnementNEstPasEncore, null, null)
           else
             ...[
               for (final p in _forfaits) _forfait(t, p),
@@ -167,7 +166,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   setState(() { _busy = false; _message = err; });
                   if (ref.read(estPremiumProvider) && mounted) Navigator.pop(context, true);
                 },
-                child: Text('Restaurer un achat', style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
+                child: Text(L.of(context).restaurerUnAchat, style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
               ),
             ],
 
@@ -177,8 +176,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 style: t.textTheme.bodyMedium?.copyWith(color: AppColors.danger)),
           ],
           const SizedBox(height: AppSpacing.s16),
-          Text('Sans engagement, résiliable à tout moment depuis votre compte Apple ou Google. '
-              'La consultation des recettes reste toujours accessible.',
+          Text(L.of(context).sansEngagementResiliableAToutMoment,
               textAlign: TextAlign.center, style: t.textTheme.labelSmall),
         ],
       ),
@@ -186,11 +184,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   }
 
   Widget _avantages(ThemeData t) {
-    const items = [
-      (Icons.mic, 'Mode cuisine vocal', 'Passez les étapes à la voix, les mains sales.'),
-      (Icons.insights, 'Programme nutritionnel', 'Vos besoins et un menu du jour pour tout le foyer.'),
-      (Icons.kitchen, 'Cuisiner avec mon frigo', 'Les recettes faisables avec ce que vous avez.'),
-      (Icons.shopping_basket, 'Liste de courses', 'Les ingrédients manquants, rassemblés.'),
+    final items = [
+      (Icons.mic, L.of(context).modeCuisineVocal, L.of(context).passezLesEtapesALaVoix),
+      (Icons.insights, L.of(context).programmeNutritionnel, L.of(context).vosBesoinsEtUnMenuDu),
+      (Icons.kitchen, L.of(context).cuisinerAvecMonFrigo, L.of(context).lesRecettesFaisablesAvecCeQue),
+      (Icons.shopping_basket, L.of(context).listeDeCourses, L.of(context).lesIngredientsManquantsRassembles),
     ];
     return Column(children: [
       for (final (ic, titre, desc) in items)
@@ -235,7 +233,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 Text(annuel ? 'Annuel' : 'Mensuel',
                     style: t.textTheme.titleMedium?.copyWith(
                         color: annuel ? Colors.white : AppColors.greenDeep)),
-                Text(annuel ? 'Le plus avantageux' : 'Sans engagement',
+                Text(annuel ? L.of(context).lePlusAvantageux : L.of(context).sansEngagement,
                     style: t.textTheme.bodyMedium?.copyWith(
                         color: annuel ? Colors.white70 : AppColors.muted)),
               ])),
@@ -264,14 +262,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 /// Porte d'accès aux fonctions premium, en deux temps.
 ///
 /// 1. Pas de compte → invitation à en créer un. L'accès est rattaché à un compte :
-///    un invité ne peut rien activer, donc inutile de lui parler d'abonnement d'abord.
+///    un invité ne peut rien activer, donc inutile de lui parler dL.of(context).abonnementDabord.
 /// 2. Compte sans accès → écran d'abonnement.
 ///
 /// Renvoie true si la fonction peut s'ouvrir.
 Future<bool> exigerPremium(BuildContext context, WidgetRef ref, {String fonction = ''}) async {
   if (!await exigerCompte(context, ref, fonction: fonction)) return false;
   if (ref.read(estPremiumProvider)) return true;
-  await ref.read(accesProvider.future); // s'assurer d'avoir la dernière vérité serveur
+  await ref.read(accesProvider.future); // sL.of(context).assurerDavoir la dernière vérité serveur
   if (ref.read(estPremiumProvider)) return true;
   if (!context.mounted) return false;
   final ok = await Navigator.of(context).push<bool>(

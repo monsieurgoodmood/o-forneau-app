@@ -6,6 +6,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/acces.dart';
 import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Mode vitrine : rend l'écran comme pour un utilisateur connecté, afin de produire les
 /// captures exigées par la revue des stores. Sans `--dart-define=VITRINE=true` la constante
@@ -13,7 +14,7 @@ import '../auth/auth_screen.dart';
 const _vitrine = bool.fromEnvironment('VITRINE');
 
 /// « J'ai commandé chez Forneau » — débloque de 1 à 12 mois selon le montant de la commande,
-/// contre un numéro de commande et l'e-mail d'achat.
+/// contre un numéro de commande et lL.of(context).eMailDachat.
 class ClaimOrderScreen extends ConsumerStatefulWidget {
   const ClaimOrderScreen({super.key});
   @override
@@ -31,7 +32,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
   @override
   void initState() {
     super.initState();
-    // Pré-remplir avec l'e-mail du compte : c'est souvent le même que celui de la commande.
+    // Pré-remplir avec lL.of(context).eMailDuCompteCest souvent le même que celui de la commande.
     _email.text = _vitrine ? '' : (ref.read(currentUserProvider)?.email ?? '');
   }
 
@@ -74,7 +75,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
         backgroundColor: AppColors.creamTop,
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
-        title: Text('Mon accès offert', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
+        title: Text(L.of(context).monAccesOffert, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, AppSpacing.s24, margin, AppSpacing.s32),
@@ -86,7 +87,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
               child: Column(children: [
                 const Icon(Icons.check_circle, color: AppColors.green, size: 44),
                 const SizedBox(height: AppSpacing.s16),
-                Text(_succes!.dejaReclamee ? 'Déjà activé' : '${_moisTexte(_succes!.mois)} offerts',
+                Text(_succes!.dejaReclamee ? L.of(context).dejaActive : '${_moisTexte(_succes!.mois)} offerts',
                     style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
                 const SizedBox(height: AppSpacing.s8),
                 Text('Votre accès complet est ouvert jusqu’au ${_date(_echeance!)}.',
@@ -94,40 +95,38 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
                 const SizedBox(height: AppSpacing.s8),
                 Text(
                   _succes!.prochainSeuil != null
-                      ? 'À partir de ${_succes!.prochainSeuil} € de commande, '
-                        'c’est ${_moisTexte(_succes!.prochainMois!)} offerts.'
-                      : 'Chaque nouvelle commande repousse votre accès.',
+                      ? 'À partir de ${_succes!.prochainSeuil} € de commande, c’est ${_moisTexte(_succes!.prochainMois!)} offerts.'
+                      : L.of(context).chaqueNouvelleCommandeRepousseVotreAcces,
                   textAlign: TextAlign.center, style: t.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: AppSpacing.s24),
-                FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Commencer à cuisiner')),
+                FilledButton(onPressed: () => Navigator.pop(context), child: Text(L.of(context).commencerACuisiner)),
               ]),
             ),
           ] else if (!connecte) ...[
-            Text('Créez votre compte', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
+            Text(L.of(context).creezVotreCompte, style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: AppSpacing.s8),
-            Text('Vos mois offerts sont rattachés à un compte, pour vous suivre sur tous vos appareils.',
+            Text(L.of(context).vosMoisOffertsSontRattachesA,
                 style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
             const SizedBox(height: AppSpacing.s24),
             FilledButton(
               onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.signup))),
-              child: const Text('Créer mon compte'),
+              child: Text(L.of(context).creerMonCompte),
             ),
           ] else ...[
-            Text('JUSQU’À 12 MOIS OFFERTS', style: AppTypography.eyebrow(AppColors.gold)),
+            Text(L.of(context).jusquA12MoisOfferts, style: AppTypography.eyebrow(AppColors.gold)),
             const SizedBox(height: AppSpacing.s8),
             Text('Vous avez commandé\nchez Forneau ?', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: AppSpacing.s16),
-            Text('Saisissez votre numéro de commande et l’e-mail utilisé lors de l’achat. '
-                'Les deux figurent sur votre e-mail de confirmation.',
+            Text(L.of(context).saisissezVotreNumeroDeCommandeEt,
                 style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
             const SizedBox(height: AppSpacing.s16),
             Container(
               padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(color: AppColors.greenSoft, borderRadius: BorderRadius.circular(AppRadius.r16)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('CE QUE VOUS OBTENEZ', style: AppTypography.eyebrow(AppColors.gold)),
+                Text(L.of(context).ceQueVousObtenez, style: AppTypography.eyebrow(AppColors.gold)),
                 const SizedBox(height: AppSpacing.s8),
                 for (final (seuil, mois) in kPaliers)
                   Padding(
@@ -138,12 +137,12 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
                           style: t.textTheme.labelLarge?.copyWith(color: AppColors.greenDeep)),
                     ]),
                   ),
-                Text('Toute commande donne au moins 1 mois.', style: t.textTheme.labelSmall),
+                Text(L.of(context).touteCommandeDonneAuMoins1, style: t.textTheme.labelSmall),
               ]),
             ),
             const SizedBox(height: AppSpacing.s24),
-            _champ(_numero, 'Numéro de commande', 'ex. 2169', TextInputType.text),
-            _champ(_email, 'E-mail de la commande', 'vous@exemple.com', TextInputType.emailAddress),
+            _champ(_numero, L.of(context).numeroDeCommande, 'ex. 2169', TextInputType.text),
+            _champ(_email, L.of(context).eMailDeLaCommande, 'vous@exemple.com', TextInputType.emailAddress),
             if (_erreur != null) ...[
               const SizedBox(height: AppSpacing.s8),
               Container(
@@ -160,11 +159,10 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
               onPressed: _busy || _numero.text.trim().isEmpty ? null : _valider,
               child: _busy
                   ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Activer mon accès offert'),
+                  : Text(L.of(context).activerMonAccesOffert),
             ),
             const SizedBox(height: AppSpacing.s16),
-            Text('Une commande n’active qu’un seul compte. Si vous avez plusieurs commandes, '
-                'chacune repousse votre accès.',
+            Text(L.of(context).uneCommandeNActiveQuUn,
                 style: t.textTheme.labelSmall),
           ],
         ],

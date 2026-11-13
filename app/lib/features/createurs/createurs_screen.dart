@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/createurs.dart';
+import '../../l10n/app_localizations.dart';
 
 /// « Mes créateurs » — l'utilisateur indique les comptes Instagram ou TikTok dont il
 /// aimerait retrouver les recettes. La proposition oriente la collecte ; on ne promet
@@ -43,7 +44,7 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      _message = err ?? 'C’est noté. On regarde ce compte.';
+      _message = err ?? L.of(context).cEstNoteOnRegardeCe;
       _succes = err == null;
       if (err == null) _saisie.clear();
     });
@@ -62,20 +63,19 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
         elevation: 0,
-        title: Text('Mes créateurs',
+        title: Text(L.of(context).mesCreateurs,
             style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, 0, margin, AppSpacing.s32),
         children: [
-          Text('VOS COMPTES PRÉFÉRÉS', style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).vosComptesPreferes, style: AppTypography.eyebrow(AppColors.gold)),
           const SizedBox(height: AppSpacing.s8),
-          Text('Quels créateurs voulez-vous retrouver ?',
+          Text(L.of(context).quelsCreateursVoulezVousRetrouver,
               style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
           const SizedBox(height: AppSpacing.s8),
           Text(
-            'Collez le lien de son profil Instagram ou TikTok, ou tapez simplement son pseudo. '
-            'Plus un compte est demandé, plus vite on s’en occupe.',
+            L.of(context).collezLeLienDeSonProfil,
             style: t.textTheme.bodyLarge,
           ),
           const SizedBox(height: AppSpacing.s24),
@@ -89,10 +89,10 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _busy ? null : _proposer(),
             decoration: InputDecoration(
-              labelText: 'Lien du profil ou pseudo',
+              labelText: L.of(context).lienDuProfilOuPseudo,
               hintText: _plateforme == Plateforme.instagram
-                  ? 'instagram.com/soncompte  ou  @soncompte'
-                  : 'tiktok.com/@soncompte  ou  @soncompte',
+                  ? L.of(context).instagramComSoncompteOuSoncompte
+                  : L.of(context).tiktokComSoncompteOuSoncompte,
               filled: true,
               fillColor: AppColors.cardBg,
               border: OutlineInputBorder(
@@ -104,7 +104,7 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
           const SizedBox(height: AppSpacing.s16),
           FilledButton(
             onPressed: _busy ? null : _proposer,
-            child: Text(_busy ? 'Envoi…' : 'Proposer ce créateur'),
+            child: Text(_busy ? 'Envoi…' : L.of(context).proposerCeCreateur),
           ),
 
           if (_message != null) ...[
@@ -116,23 +116,22 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
           ],
 
           const SizedBox(height: AppSpacing.s32),
-          Text('VOS PROPOSITIONS', style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).vosPropositions, style: AppTypography.eyebrow(AppColors.gold)),
           const SizedBox(height: AppSpacing.s8),
           mes.when(
             loading: () => const Padding(
               padding: EdgeInsets.all(AppSpacing.s16),
               child: Center(child: CircularProgressIndicator(color: AppColors.green)),
             ),
-            error: (_, __) => Text('Liste indisponible pour le moment.', style: t.textTheme.bodyMedium),
+            error: (_, __) => Text(L.of(context).listeIndisponiblePourLeMoment, style: t.textTheme.bodyMedium),
             data: (liste) => liste.isEmpty
-                ? Text('Vous n’avez encore proposé personne.', style: t.textTheme.bodyMedium)
+                ? Text(L.of(context).vousNAvezEncoreProposePersonne, style: t.textTheme.bodyMedium)
                 : Column(children: [for (final c in liste) _ligne(t, c)]),
           ),
 
           const SizedBox(height: AppSpacing.s24),
           Text(
-            'Les recettes sont toujours réécrites par nos soins, avec nos propres photos. '
-            'Nous ne reprenons ni les textes ni les images des créateurs.',
+            L.of(context).lesRecettesSontToujoursReecritesPar,
             textAlign: TextAlign.center,
             style: t.textTheme.labelSmall,
           ),

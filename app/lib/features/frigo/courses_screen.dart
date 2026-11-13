@@ -7,6 +7,7 @@ import '../../data/favorites.dart';
 import '../../data/courses.dart';
 import '../../data/pantry.dart';
 import '../../data/recipes_repository.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Liste de courses — ingrédients manquants des recettes favorites (hors frigo), groupés,
 /// cochables (coché = acheté). Port 1:1 du web.
@@ -38,8 +39,8 @@ class CoursesScreen extends ConsumerWidget {
         backgroundColor: AppColors.creamTop,
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
-        title: Text('Liste de courses', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
-        actions: [if (cart.isNotEmpty) TextButton(onPressed: () => ref.read(cartProvider.notifier).clear(), child: const Text('Décocher tout', style: TextStyle(color: AppColors.muted)))],
+        title: Text(L.of(context).listeDeCourses, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
+        actions: [if (cart.isNotEmpty) TextButton(onPressed: () => ref.read(cartProvider.notifier).clear(), child: Text(L.of(context).decocherTout, style: TextStyle(color: AppColors.muted)))],
       ),
       body: lignes.isEmpty
           ? Center(
@@ -48,7 +49,7 @@ class CoursesScreen extends ConsumerWidget {
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   const Icon(Icons.shopping_basket_outlined, size: 40, color: AppColors.gold),
                   const SizedBox(height: AppSpacing.s16),
-                  Text('Liste vide', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
+                  Text(L.of(context).listeVide, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
                   const SizedBox(height: AppSpacing.s8),
                   Text("Ajoutez des recettes en favori : leurs ingrédients manquants s'accumulent ici.", textAlign: TextAlign.center, style: t.textTheme.bodyMedium),
                 ]),
@@ -57,7 +58,7 @@ class CoursesScreen extends ConsumerWidget {
           : ListView(
               padding: EdgeInsets.fromLTRB(margin, AppSpacing.s16, margin, AppSpacing.s32),
               children: [
-                Text('À ACHETER', style: AppTypography.eyebrow(AppColors.gold)),
+                Text(L.of(context).aAcheter, style: AppTypography.eyebrow(AppColors.gold)),
                 const SizedBox(height: AppSpacing.s8),
                 Text('${lignes.length} article${lignes.length > 1 ? 's' : ''}', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
                 const SizedBox(height: AppSpacing.s16),

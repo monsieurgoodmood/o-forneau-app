@@ -8,6 +8,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/programme.dart';
 import 'foyer_screen.dart';
 import 'programme_widgets.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Programme nutritionnel — réplique du web : profil, objectif, type d'alimentation,
 /// besoins calculés, et menu du jour compatible avec tous les régimes du foyer.
@@ -33,27 +34,27 @@ class ProgrammeScreen extends ConsumerWidget {
         backgroundColor: AppColors.creamTop,
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
-        title: Text('Programme', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
+        title: Text(L.of(context).programme, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
         actions: [
           TextButton.icon(
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FoyerScreen())),
             icon: const Icon(Icons.group_outlined, color: AppColors.green, size: 18),
-            label: Text('Mon foyer', style: t.textTheme.labelLarge?.copyWith(color: AppColors.green)),
+            label: Text(L.of(context).monFoyer, style: t.textTheme.labelLarge?.copyWith(color: AppColors.green)),
           ),
         ],
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, AppSpacing.s16, margin, AppSpacing.s32),
         children: [
-          const Eyebrow('Programme nutritionnel'),
-          Text('Votre programme sur mesure', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
+          Eyebrow(L.of(context).programmeNutritionnel),
+          Text(L.of(context).votreProgrammeSurMesure, style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
           const SizedBox(height: AppSpacing.s8),
-          Text('Renseignez votre profil et votre objectif : on calcule vos besoins et on compose une journée adaptée. Estimation indicative, pas un avis médical.',
+          Text(L.of(context).renseignezVotreProfilEtVotreObjectif,
               style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
           const SizedBox(height: AppSpacing.s24),
 
           // Profil
-          const Eyebrow('Votre profil'),
+          Eyebrow(L.of(context).votreProfil2),
           SectionCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('SEXE', style: AppTypography.eyebrow(AppColors.muted).copyWith(fontSize: 11)),
@@ -80,7 +81,7 @@ class ProgrammeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.s16),
               Text(
-                target.tdee > 0 ? 'Dépense estimée ~${target.tdee} kcal/jour (Mifflin-St Jeor).' : 'Renseignez taille et poids pour un calcul personnalisé.',
+                target.tdee > 0 ? 'Dépense estimée ~${target.tdee} kcal/jour (Mifflin-St Jeor).' : L.of(context).renseignezTailleEtPoidsPourUn,
                 style: t.textTheme.bodyMedium,
               ),
             ]),
@@ -88,7 +89,7 @@ class ProgrammeScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s24),
 
           // Objectif
-          const Eyebrow('Votre objectif'),
+          Eyebrow(L.of(context).votreObjectif),
           _GrilleChoix(children: [
             for (final e in kGoals.entries)
               (double l) => ChoiceCard(
@@ -113,14 +114,14 @@ class ProgrammeScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s24),
 
           // Besoins
-          const Eyebrow('Vos besoins'),
+          Eyebrow(L.of(context).vosBesoins),
           SectionCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('Objectif ${target.kcal} kcal/jour', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
               const SizedBox(height: AppSpacing.s8),
               Row(children: [
-                _Macro('Protéines', '${target.p} g', 'muscles'),
-                _Macro('Lipides', '${target.l} g', 'bons gras'),
+                _Macro(L.of(context).proteines, '${target.p} g', 'muscles'),
+                _Macro('Lipides', '${target.l} g', L.of(context).bonsGras),
                 _Macro('Glucides', '${target.g} g', 'énergie'),
               ]),
               const SizedBox(height: AppSpacing.s8),
@@ -131,11 +132,11 @@ class ProgrammeScreen extends ConsumerWidget {
 
           // Menu du jour
           Row(children: [
-            const Expanded(child: Eyebrow('Menu du jour')),
+            Expanded(child: Eyebrow(L.of(context).menuDuJour)),
             TextButton.icon(
               onPressed: () => ref.read(menuSeedProvider.notifier).state++,
               icon: const Icon(Icons.refresh, size: 18, color: AppColors.green),
-              label: Text('Autre menu', style: t.textTheme.labelLarge?.copyWith(color: AppColors.green)),
+              label: Text(L.of(context).autreMenu, style: t.textTheme.labelLarge?.copyWith(color: AppColors.green)),
             ),
           ]),
           if (foyer.mode != 'solo')
@@ -145,7 +146,7 @@ class ProgrammeScreen extends ConsumerWidget {
             ),
           for (final item in plan) _PlanCard(item: item),
           Row(children: [
-            Text('Ajouter un goûter', style: t.textTheme.labelLarge),
+            Text(L.of(context).ajouterUnGouter, style: t.textTheme.labelLarge),
             const Spacer(),
             Switch(value: gouter, activeColor: AppColors.green, onChanged: (v) => ref.read(gouterProvider.notifier).state = v),
           ]),
@@ -166,13 +167,12 @@ class ProgrammeScreen extends ConsumerWidget {
               ClipRRect(borderRadius: BorderRadius.circular(999), child: LinearProgressIndicator(value: pct, minHeight: 8, backgroundColor: AppColors.greenSoft, color: AppColors.green)),
               if (ecart > kToleranceCible) ...[
                 const SizedBox(height: AppSpacing.s8),
-                Text('Cette journée s’écarte de ${(ecart * 100).round()} % du repere. '
-                    'Régénérez-la, ou complétez votre profil pour un calcul plus juste.',
+                Text('Cette journée s’écarte de ${(ecart * 100).round()} % du repere. Régénérez-la, ou complétez votre profil pour un calcul plus juste.',
                     style: t.textTheme.labelSmall?.copyWith(color: AppColors.gold)),
               ],
               if (!surMesure) ...[
                 const SizedBox(height: 4),
-                Text('Renseignez taille et poids pour une cible personnelle.',
+                Text(L.of(context).renseignezTailleEtPoidsPourUne,
                     style: t.textTheme.labelSmall),
               ],
             ]);

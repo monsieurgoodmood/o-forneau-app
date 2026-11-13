@@ -16,6 +16,7 @@ import '../home/home_screen.dart';
 import '../auth/account_screen.dart';
 import '../acces/paywall_screen.dart';
 import '../frigo/courses_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Accueil « Les recettes » — réplique du web (crème, wordmark, cartes éditoriales).
 class RecipesListScreen extends ConsumerWidget {
@@ -51,7 +52,7 @@ class RecipesListScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Text('Les recettes', style: Theme.of(context).textTheme.displayLarge?.copyWith(color: AppColors.greenDeep)),
+                          Text(L.of(context).lesRecettes, style: Theme.of(context).textTheme.displayLarge?.copyWith(color: AppColors.greenDeep)),
                           const Spacer(),
                           Text('${filtered.length}', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.gold)),
                           const SizedBox(width: 4),
@@ -76,7 +77,7 @@ class RecipesListScreen extends ConsumerWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(margin * 2),
-                    child: Center(child: Text('Aucune recette ne correspond.', style: Theme.of(context).textTheme.bodyMedium)),
+                    child: Center(child: Text(L.of(context).aucuneRecetteNeCorrespond, style: Theme.of(context).textTheme.bodyMedium)),
                   ),
                 )
               else if (cols == 1)
@@ -140,16 +141,16 @@ class _Wordmark extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Ô FORNEAU !',
+              Text(L.of(context).oForneau,
                   style: AppTypography.textTheme(AppColors.greenDeep, AppColors.muted)
                       .titleLarge
                       ?.copyWith(fontSize: 24, letterSpacing: 2.5, color: AppColors.greenDeep)),
-              Text('PAR MAISON FORNEAU · 1974', style: AppTypography.eyebrow(AppColors.gold).copyWith(fontSize: 10, letterSpacing: 1.6)),
+              Text(L.of(context).parMaisonForneau1974, style: AppTypography.eyebrow(AppColors.gold).copyWith(fontSize: 10, letterSpacing: 1.6)),
             ],
           ),
           const Spacer(),
           IconButton(
-            tooltip: 'Mon compte',
+            tooltip: L.of(context).monCompte,
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen())),
             icon: const Icon(Icons.person_outline, color: AppColors.green),
           ),
@@ -176,7 +177,7 @@ class _SearchField extends StatelessWidget {
         textInputAction: TextInputAction.search,
         style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
-          hintText: 'Rechercher une recette, un ingrédient…',
+          hintText: L.of(context).rechercherUneRecetteUnIngredient,
           hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.muted),
           prefixIcon: const Icon(Icons.search, color: AppColors.green),
           border: InputBorder.none,
@@ -252,17 +253,27 @@ class _FiltersSheet extends ConsumerWidget {
           ]),
           section('Régime', [
             for (final e in kDiets.entries)
-              if (e.key == 'vegetarien' || e.key == 'vegan' || e.key == 'hypocalorique')
-                _ChoicePill(label: e.value.long, selected: filter.diets.contains(e.key), onTap: () => notifier.toggleDiet(e.key)),
+              _ChoicePill(label: e.value.long, selected: filter.diets.contains(e.key), onTap: () => notifier.toggleDiet(e.key)),
           ]),
+          section(L.of(context).exclureUnAllergene, [
+            for (final e in kAllergenes.entries)
+              _ChoicePill(label: e.value, selected: filter.allergenes.contains(e.key), onTap: () => notifier.toggleAllergene(e.key)),
+          ]),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.s24),
+            child: Text(
+              L.of(context).lesAllergenesSontDeduitsDesIngredients,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
           section('Tri', [
-            _ChoicePill(label: 'Mieux notées', selected: filter.sortRated, onTap: notifier.toggleSortRated),
+            _ChoicePill(label: L.of(context).mieuxNotees, selected: filter.sortRated, onTap: notifier.toggleSortRated),
           ]),
           Row(
             children: [
-              TextButton(onPressed: () => notifier.clear(), child: const Text('Tout effacer', style: TextStyle(color: AppColors.muted))),
+              TextButton(onPressed: () => notifier.clear(), child: Text(L.of(context).toutEffacer, style: TextStyle(color: AppColors.muted))),
               const Spacer(),
-              FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Voir les recettes')),
+              FilledButton(onPressed: () => Navigator.pop(context), child: Text(L.of(context).voirLesRecettes)),
             ],
           ),
         ],
@@ -430,7 +441,7 @@ class _BottomNav extends ConsumerWidget {
             // magasin : elles ne peuvent pas vivre uniquement derriere une fiche recette
             // comme c etait le cas sur mobile (ticket A22).
             () async {
-              if (!await exigerPremium(context, ref, fonction: 'La liste de courses')) return;
+              if (!await exigerPremium(context, ref, fonction: L.of(context).laListeDeCourses)) return;
               if (!context.mounted) return;
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CoursesScreen()));
             }();
@@ -438,7 +449,7 @@ class _BottomNav extends ConsumerWidget {
           }
           if (i == 2) {
             () async {
-              if (!await exigerPremium(context, ref, fonction: 'Le programme nutritionnel')) return;
+              if (!await exigerPremium(context, ref, fonction: L.of(context).leProgrammeNutritionnel)) return;
               if (!context.mounted) return;
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgrammeScreen()));
             }();
@@ -449,10 +460,10 @@ class _BottomNav extends ConsumerWidget {
             return;
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(icon: Icon(Icons.home_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.home, color: AppColors.green), label: 'Accueil'),
           NavigationDestination(icon: Icon(Icons.explore_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.explore, color: AppColors.green), label: 'Recettes'),
-          NavigationDestination(icon: Icon(Icons.tune_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.tune, color: AppColors.green), label: 'Programme'),
+          NavigationDestination(icon: Icon(Icons.tune_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.tune, color: AppColors.green), label: L.of(context).programme),
           NavigationDestination(icon: Icon(Icons.shopping_basket_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.shopping_basket, color: AppColors.green), label: 'Courses'),
           NavigationDestination(icon: Icon(Icons.favorite_border, color: AppColors.muted), selectedIcon: Icon(Icons.favorite, color: AppColors.green), label: 'Favoris'),
         ],

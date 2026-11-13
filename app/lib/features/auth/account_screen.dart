@@ -10,6 +10,7 @@ import '../createurs/createurs_screen.dart';
 import '../acces/claim_order_screen.dart';
 import '../acces/paywall_screen.dart';
 import 'auth_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Bloc « votre accès » : état courant et action adaptée.
 class _CarteAcces extends ConsumerWidget {
@@ -25,21 +26,21 @@ class _CarteAcces extends ConsumerWidget {
 
     final (titre, detail, cta) = switch (a) {
       _ when a.actif && a.estClient => (
-          'Accès client actif',
+          L.of(context).accesClientActif,
           'Ouvert jusqu’au ${_date(a.expiresAt!)}. Chaque nouvelle commande le repousse, jusqu’à 12 mois.',
           null),
       _ when a.actif && a.estAbonne => (
-          'Abonnement actif',
-          'Résiliable à tout moment depuis votre compte Apple ou Google.',
+          L.of(context).abonnementActif,
+          L.of(context).resiliableAToutMomentDepuisVotre,
           null),
       _ when a.actif && a.estEssai => (
-          'Essai en cours',
+          L.of(context).essaiEnCours,
           'Il vous reste ${a.joursRestants} jour${a.joursRestants > 1 ? 's' : ''}. Vous avez commandé chez Forneau ? Activez votre accès offert.',
-          'Activer mon accès offert'),
+          L.of(context).activerMonAccesOffert),
       _ => (
-          'Accès limité',
-          'Vous pouvez parcourir toutes les recettes. Les fonctions premium demandent un accès.',
-          'Voir les options'),
+          L.of(context).accesLimite,
+          L.of(context).vousPouvezParcourirToutesLesRecettes,
+          L.of(context).voirLesOptions),
     };
 
     return Container(
@@ -50,7 +51,7 @@ class _CarteAcces extends ConsumerWidget {
         border: Border.all(color: a.actif ? AppColors.green.withValues(alpha: 0.3) : AppColors.line),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('VOTRE ACCÈS', style: AppTypography.eyebrow(AppColors.gold)),
+        Text(L.of(context).votreAcces, style: AppTypography.eyebrow(AppColors.gold)),
         const SizedBox(height: 4),
         Text(titre, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
         const SizedBox(height: 4),
@@ -85,25 +86,25 @@ class AccountScreen extends ConsumerWidget {
         backgroundColor: AppColors.creamTop,
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
-        title: Text('Mon compte', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
+        title: Text(L.of(context).monCompte, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, AppSpacing.s16, margin, AppSpacing.s32),
         children: [
           if (user == null) ...[
-            Text('Vous naviguez en invité', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
+            Text(L.of(context).vousNaviguezEnInvite, style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: AppSpacing.s8),
-            Text('Créez un compte pour retrouver vos favoris, votre frigo, votre programme et vos avis sur tous vos appareils.', style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
+            Text(L.of(context).creezUnComptePourRetrouverVos, style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
             const SizedBox(height: AppSpacing.s24),
-            FilledButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.signup))), child: const Text('Créer mon compte')),
+            FilledButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => AuthScreen(mode: AuthMode.signup))), child: Text(L.of(context).creerMonCompte)),
             const SizedBox(height: AppSpacing.s8),
             OutlinedButton(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.login))),
               style: OutlinedButton.styleFrom(foregroundColor: AppColors.green, side: const BorderSide(color: AppColors.green), minimumSize: const Size(0, 52), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
-              child: const Text('J’ai déjà un compte'),
+              child: Text(L.of(context).jAiDejaUnCompte),
             ),
           ] else ...[
-            Text('VOTRE PROFIL', style: AppTypography.eyebrow(AppColors.gold)),
+            Text(L.of(context).votreProfil, style: AppTypography.eyebrow(AppColors.gold)),
             const SizedBox(height: AppSpacing.s8),
             Text(prenom != null && prenom.isNotEmpty ? 'Bonjour $prenom' : 'Bonjour', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: 4),
@@ -114,14 +115,14 @@ class AccountScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
-              child: Text('Vos favoris, votre frigo, votre liste de courses, votre programme et votre foyer sont synchronisés avec ce compte (données hébergées en Europe).', style: t.textTheme.bodyLarge),
+              child: Text(L.of(context).vosFavorisVotreFrigoVotreListe, style: t.textTheme.bodyLarge),
             ),
             const SizedBox(height: AppSpacing.s16),
             OutlinedButton.icon(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateursScreen())),
               style: OutlinedButton.styleFrom(foregroundColor: AppColors.green, side: const BorderSide(color: AppColors.green), minimumSize: const Size(0, 52), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
               icon: const Icon(Icons.auto_awesome_outlined),
-              label: const Text('Mes créateurs préférés'),
+              label: Text(L.of(context).mesCreateursPreferes),
             ),
             const SizedBox(height: AppSpacing.s24),
             OutlinedButton.icon(
@@ -131,19 +132,19 @@ class AccountScreen extends ConsumerWidget {
               },
               style: OutlinedButton.styleFrom(foregroundColor: AppColors.green, side: const BorderSide(color: AppColors.green), minimumSize: const Size(0, 52), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
               icon: const Icon(Icons.logout),
-              label: const Text('Me déconnecter'),
+              label: Text(L.of(context).meDeconnecter),
             ),
             const SizedBox(height: AppSpacing.s8),
             TextButton(
               onPressed: () => launchUrl(Uri.parse('https://app.forneau.com/legal/suppression.html'), mode: LaunchMode.externalApplication),
-              child: Text('Supprimer mon compte et mes données', style: t.textTheme.labelLarge?.copyWith(color: AppColors.danger)),
+              child: Text(L.of(context).supprimerMonCompteEtMesDonnees, style: t.textTheme.labelLarge?.copyWith(color: AppColors.danger)),
             ),
           ],
           const SizedBox(height: AppSpacing.s24),
           const Divider(color: AppColors.line),
           TextButton(
             onPressed: () => launchUrl(Uri.parse('https://app.forneau.com/legal/privacy.html'), mode: LaunchMode.externalApplication),
-            child: Text('Politique de confidentialité', style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
+            child: Text(L.of(context).politiqueDeConfidentialite, style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
           ),
           TextButton(
             onPressed: () => launchUrl(Uri.parse('https://forneau.com'), mode: LaunchMode.externalApplication),

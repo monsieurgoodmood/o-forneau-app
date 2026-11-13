@@ -68,6 +68,8 @@ class Recipe {
   final List<String> meal; // petit-dej, dejeuner, diner, gouter, encas, proteine, dessert
   final String img; // chemin relatif sur app.forneau.com
   final String role; // plat | sauce | base : une sauce ne tient pas lieu de repas
+  final List<String> allerg; // allergenes certains (categories INCO)
+  final List<String> allergDoute; // allergenes possibles : composition industrielle inconnue
 
   const Recipe({
     required this.slug,
@@ -88,7 +90,13 @@ class Recipe {
     required this.meal,
     required this.img,
     this.role = 'plat',
+    this.allerg = const [],
+    this.allergDoute = const [],
   });
+
+  /// Pour un filtre d'exclusion, le doute compte comme une presence : en allergie,
+  /// on s'abstient plutot que de parier sur la composition d'un bouillon.
+  bool contientAllergene(String cle) => allerg.contains(cle) || allergDoute.contains(cle);
 
   String get imageUrl => img.isEmpty ? '' : 'https://app.forneau.com/$img';
 
@@ -121,6 +129,8 @@ class Recipe {
       meal: strList(j['meal']),
       img: j['img']?.toString() ?? '',
       role: (j['role']?.toString().isNotEmpty ?? false) ? j['role'].toString() : 'plat',
+      allerg: (j['allerg'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+      allergDoute: (j['allerg_doute'] as List?)?.map((e) => e.toString()).toList() ?? const [],
     );
   }
 }

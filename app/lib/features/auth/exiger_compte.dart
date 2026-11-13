@@ -5,6 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/auth.dart';
 import 'auth_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Porte « compte ». L'invité parcourt librement les recettes ; dès qu'il veut AGIR
 /// — lancer une recette, bâtir un programme, cuisiner avec son frigo — il lui faut un
@@ -44,43 +45,42 @@ class InvitationCompteScreen extends ConsumerWidget {
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, 0, margin, AppSpacing.s32),
         children: [
-          Text('CRÉEZ VOTRE COMPTE', style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).creezVotreCompte2, style: AppTypography.eyebrow(AppColors.gold)),
           const SizedBox(height: AppSpacing.s8),
           Text(
-            fonction.isEmpty ? 'Un compte, et on cuisine' : '$fonction\ndemande un compte',
+            fonction.isEmpty ? L.of(context).unCompteEtOnCuisine : '$fonction\ndemande un compte',
             style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep),
           ),
           const SizedBox(height: AppSpacing.s8),
           Text(
-            'Parcourir les recettes restera toujours libre. Le compte sert à garder ce qui '
-            'vous appartient : vos portions, votre foyer, vos favoris, votre accès.',
+            L.of(context).parcourirLesRecettesResteraToujoursLibre,
             style: t.textTheme.bodyLarge,
           ),
           const SizedBox(height: AppSpacing.s24),
-          _avantages(t),
+          _avantages(context, t),
           const SizedBox(height: AppSpacing.s24),
           FilledButton(
             onPressed: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.signup))),
-            child: const Text('Créer mon compte'),
+            child: Text(L.of(context).creerMonCompte),
           ),
           const SizedBox(height: AppSpacing.s8),
           TextButton(
             onPressed: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.login))),
-            child: Text('J’ai déjà un compte',
+            child: Text(L.of(context).jAiDejaUnCompte,
                 style: t.textTheme.labelLarge?.copyWith(color: AppColors.green)),
           ),
           const SizedBox(height: AppSpacing.s8),
-          Text('Gratuit, en trente secondes. Vos données restent en Europe.',
+          Text(L.of(context).gratuitEnTrenteSecondesVosDonnees,
               textAlign: TextAlign.center, style: t.textTheme.labelSmall),
         ],
       ),
     );
   }
 
-  Widget _avantages(ThemeData t) {
-    const items = [
+  Widget _avantages(BuildContext context, ThemeData t) {
+    final items = [
       (Icons.devices, 'Sur tous vos appareils', 'Vos favoris et vos réglages vous suivent.'),
       (Icons.local_offer_outlined, 'Vos mois offerts', 'Une commande Forneau ouvre l’app, jusqu’à 12 mois.'),
       (Icons.groups_outlined, 'Adapté à votre foyer', 'Les quantités et la nutrition suivent qui mange.'),

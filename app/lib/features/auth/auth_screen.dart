@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/auth.dart';
+import '../../l10n/app_localizations.dart';
 
 enum AuthMode { signup, login }
 
@@ -44,7 +45,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     try {
       final actions = ref.read(authActionsProvider);
       if (_isSignup) {
-        if (_prenom.text.trim().isEmpty) throw 'Votre prénom est requis.';
+        if (_prenom.text.trim().isEmpty) throw L.of(context).votrePrenomEstRequis;
         await actions.signUp(
           email: _email.text.trim(),
           password: _password.text,
@@ -60,7 +61,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         Navigator.of(context).pop();
       } else if (mounted && _isSignup) {
         // Si confirmation e-mail requise, pas de session immédiate.
-        setState(() => _error = 'Compte créé. Vérifiez vos e-mails si une confirmation est demandée, puis connectez-vous.');
+        setState(() => _error = L.of(context).compteCreeVerifiezVosEMails);
       }
     } catch (e) {
       setState(() => _error = e is String ? e : _pretty(e.toString()));
@@ -70,10 +71,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   String _pretty(String raw) {
-    if (raw.contains('Invalid login')) return 'E-mail ou mot de passe incorrect.';
-    if (raw.contains('already registered')) return 'Un compte existe déjà avec cet e-mail.';
-    if (raw.contains('Password should')) return 'Mot de passe trop court (6 caractères minimum).';
-    return 'Une erreur est survenue. Réessayez.';
+    if (raw.contains(L.of(context).invalidLogin)) return L.of(context).eMailOuMotDePasse;
+    if (raw.contains(L.of(context).alreadyRegistered)) return L.of(context).unCompteExisteDejaAvecCet;
+    if (raw.contains(L.of(context).passwordShould)) return L.of(context).motDePasseTropCourt6;
+    return L.of(context).uneErreurEstSurvenueReessayez;
   }
 
   @override
@@ -93,17 +94,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(_isSignup ? 'Créer mon compte' : 'Connexion',
+              Text(_isSignup ? L.of(context).creerMonCompte : L.of(context).connexion,
                   style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
               const SizedBox(height: AppSpacing.s24),
               if (_isSignup) ...[
                 _field(_prenom, 'Prénom', TextInputType.name),
-                _field(_nom, 'Nom (facultatif)', TextInputType.name),
+                _field(_nom, L.of(context).nomFacultatif, TextInputType.name),
               ],
               _field(_email, 'E-mail', TextInputType.emailAddress),
-              _field(_password, 'Mot de passe', TextInputType.visiblePassword, obscure: true),
+              _field(_password, L.of(context).motDePasse, TextInputType.visiblePassword, obscure: true),
               if (_isSignup) ...[
-                _field(_tel, 'Téléphone (facultatif)', TextInputType.phone),
+                _field(_tel, L.of(context).telephoneFacultatif, TextInputType.phone),
                 const SizedBox(height: AppSpacing.s8),
                 CheckboxListTile(
                   value: _marketing,
@@ -111,7 +112,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                   activeColor: AppColors.green,
-                  title: Text('Je souhaite recevoir les recettes et nouveautés par e-mail.', style: t.textTheme.bodyMedium),
+                  title: Text(L.of(context).jeSouhaiteRecevoirLesRecettesEt, style: t.textTheme.bodyMedium),
                 ),
               ],
               if (_error != null) ...[
@@ -123,13 +124,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 onPressed: _busy ? null : _submit,
                 child: _busy
                     ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text(_isSignup ? 'Créer mon compte' : 'Se connecter'),
+                    : Text(_isSignup ? L.of(context).creerMonCompte : L.of(context).seConnecter),
               ),
               const SizedBox(height: AppSpacing.s16),
               TextButton(
                 onPressed: _busy ? null : () => setState(() { _mode = _isSignup ? AuthMode.login : AuthMode.signup; _error = null; }),
                 child: Text(
-                  _isSignup ? 'J’ai déjà un compte' : 'Créer un compte',
+                  _isSignup ? L.of(context).jAiDejaUnCompte : L.of(context).creerUnCompte,
                   style: t.textTheme.labelLarge?.copyWith(color: AppColors.green),
                 ),
               ),

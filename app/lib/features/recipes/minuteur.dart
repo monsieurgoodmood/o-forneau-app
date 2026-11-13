@@ -1,7 +1,7 @@
 /// Minuteur du mode cuisine.
 ///
 /// Il appartient à une ÉTAPE, pas à l'écran. L'audit du 13/11/2026 a relevé qu'en passant
-/// à l'étape suivante puis en revenant, le décompte repartait de zéro : quelqu'un qui
+/// à lL.of(context).etapeSuivantePuisEnRevenantLeun qui
 /// relit l'étape précédente pendant que ça cuit perdait son minuteur.
 ///
 /// Deuxième correction, invisible mais plus grave : le décompte se faisait en comptant les

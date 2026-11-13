@@ -1,0 +1,8 @@
+# Génération des traductions. Le français est la source : c'est la langue dans laquelle
+# les textes sont écrits et relus, et celle sur laquelle tournent les vérifications
+# (régimes, allergènes, rôles). Les autres langues en dérivent.
+arb-dir: lib/l10n
+template-arb-file: app_fr.arb
+output-localization-file: app_localizations.dart
+output-class: L
+nullable-getter: false

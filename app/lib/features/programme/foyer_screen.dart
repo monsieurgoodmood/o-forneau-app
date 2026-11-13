@@ -5,6 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/programme.dart';
 import 'programme_widgets.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Mon foyer — réplique du web : solo/plusieurs, nombre de personnes, profil et régime par membre.
 class FoyerScreen extends ConsumerWidget {
@@ -24,27 +25,27 @@ class FoyerScreen extends ConsumerWidget {
         backgroundColor: AppColors.creamTop,
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.greenDeep,
-        title: Text('Mon foyer', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
+        title: Text(L.of(context).monFoyer, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, AppSpacing.s16, margin, AppSpacing.s32),
         children: [
-          const Eyebrow('Mon foyer'),
-          Text('Pour qui cuisinez-vous ?', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
+          Eyebrow(L.of(context).monFoyer),
+          Text(L.of(context).pourQuiCuisinezVous, style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
           const SizedBox(height: AppSpacing.s8),
-          Text('On adapte les quantités des recettes, et si vous le souhaitez les valeurs nutritionnelles, à votre foyer. Tout est optionnel : commencez simple.',
+          Text(L.of(context).onAdapteLesQuantitesDesRecettes,
               style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
           const SizedBox(height: AppSpacing.s24),
 
-          const Eyebrow('Je cuisine…'),
+          Eyebrow(L.of(context).jeCuisine),
           SegPair(
-            a: 'Juste pour moi', subA: '1 personne', b: 'Pour plusieurs', subB: 'famille, amis…',
+            a: L.of(context).justePourMoi, subA: '1 personne', b: L.of(context).pourPlusieurs, subB: 'famille, amis…',
             first: solo,
             onChanged: (s) => set(foyer.copyWith(mode: s ? 'solo' : 'famille')),
           ),
           if (!solo) ...[
             const SizedBox(height: AppSpacing.s24),
-            const Eyebrow('Combien de personnes ?'),
+            Eyebrow(L.of(context).combienDePersonnes),
             CounterCard(value: foyer.count.clamp(1, 12), label: 'personnes', onChanged: (v) => set(foyer.copyWith(count: v))),
             const SizedBox(height: AppSpacing.s24),
             Container(
@@ -60,8 +61,8 @@ class FoyerScreen extends ConsumerWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(style: t.textTheme.bodyLarge, children: [
-                      TextSpan(text: 'Affiner la nutrition ', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, fontSize: 18)),
-                      const TextSpan(text: 'Renseignez âge, taille, poids, activité et régime — on calcule les besoins de chacun et le menu du jour convient à tous.'),
+                      TextSpan(text: L.of(context).affinerLaNutrition, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, fontSize: 18)),
+                      TextSpan(text: L.of(context).renseignezAgeTaillePoidsActiviteEt),
                     ]),
                   ),
                 ),

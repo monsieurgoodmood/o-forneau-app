@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/router/app_router.dart';
+import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'data/auth.dart';
 import 'data/supabase_client.dart';
@@ -55,6 +56,11 @@ class OForneauApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Ô Forneau !',
       debugShowCheckedModeBanner: false,
+      // Langues des clients reels, mesurees sur 713 commandes payees : francais 80,9 %,
+      // anglais 10,4 %, allemand 5,8 %, italien 1,1 %, neerlandais 0,8 %, espagnol 0,6 %,
+      // portugais 0,3 %. Ensemble, 99,9 % des clients.
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
       theme: AppTheme.light,
       themeMode: ThemeMode.light, // charte Forneau : clair uniquement
       routerConfig: router,

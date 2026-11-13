@@ -15,6 +15,7 @@ import '../auth/exiger_compte.dart';
 import '../createurs/createurs_screen.dart';
 import '../programme/foyer_screen.dart';
 import '../programme/programme_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 const _base = 'https://app.forneau.com/';
 
@@ -86,18 +87,18 @@ class HomeScreen extends ConsumerWidget {
                 Positioned(
                   left: 0, right: 0, bottom: 22,
                   child: Column(children: [
-                    Text('Ô FORNEAU !', style: AppTypography.eyebrow(Colors.white).copyWith(letterSpacing: 3)),
+                    Text(L.of(context).oForneau, style: AppTypography.eyebrow(Colors.white).copyWith(letterSpacing: 3)),
                     const SizedBox(height: 6),
-                    Text('Bien manger, simplement', textAlign: TextAlign.center, style: t.textTheme.displayLarge?.copyWith(color: Colors.white, fontSize: 32)),
+                    Text(L.of(context).bienMangerSimplement, textAlign: TextAlign.center, style: t.textTheme.displayLarge?.copyWith(color: Colors.white, fontSize: 32)),
                     const SizedBox(height: 4),
-                    Text('par Maison Forneau', style: t.textTheme.titleLarge?.copyWith(color: Colors.white, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400)),
+                    Text(L.of(context).parMaisonForneau, style: t.textTheme.titleLarge?.copyWith(color: Colors.white, fontStyle: FontStyle.italic, fontWeight: FontWeight.w400)),
                   ]),
                 ),
               ]),
             ),
           ),
           const SizedBox(height: AppSpacing.s16),
-          Text('Des recettes au titane, adaptées à votre régime, votre appareil et votre temps. Par où commencer ?',
+          Text(L.of(context).desRecettesAuTitaneAdapteesA,
               textAlign: TextAlign.center, style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
           const SizedBox(height: AppSpacing.s24),
 
@@ -120,20 +121,20 @@ class HomeScreen extends ConsumerWidget {
           ],
 
           // Menu
-          _MenuCard(icon: 'ic-assistant', title: 'Trouver une recette', desc: 'Toutes les recettes, filtrées comme vous voulez.', featured: true, onTap: () => context.go('/')),
-          _MenuCard(icon: 'ic-programme', title: 'Mon programme nutritionnel', desc: 'Un objectif, une journée de repas équilibrée.', onTap: () async {
-            if (!await exigerPremium(context, ref, fonction: 'Le programme nutritionnel')) return;
+          _MenuCard(icon: L.of(context).icAssistant, title: L.of(context).trouverUneRecette, desc: L.of(context).toutesLesRecettesFiltreesCommeVous, featured: true, onTap: () => context.go('/')),
+          _MenuCard(icon: L.of(context).icProgramme, title: L.of(context).monProgrammeNutritionnel, desc: L.of(context).unObjectifUneJourneeDeRepas, onTap: () async {
+            if (!await exigerPremium(context, ref, fonction: L.of(context).leProgrammeNutritionnel)) return;
             if (!context.mounted) return;
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgrammeScreen()));
           }),
-          _MenuCard(icon: 'ic-foyer', title: 'Pour qui je cuisine ?', desc: 'Solo ou famille — quantités et nutrition adaptées.', onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FoyerScreen()))),
-          _MenuCard(icon: 'ic-frigo', title: 'Cuisiner avec mon frigo', desc: 'Ce que vous pouvez faire, avec ce que vous avez.', onTap: () async {
-            if (!await exigerPremium(context, ref, fonction: 'Cuisiner avec mon frigo')) return;
+          _MenuCard(icon: L.of(context).icFoyer, title: L.of(context).pourQuiJeCuisine, desc: L.of(context).soloOuFamilleQuantitesEtNutrition, onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FoyerScreen()))),
+          _MenuCard(icon: L.of(context).icFrigo, title: L.of(context).cuisinerAvecMonFrigo, desc: L.of(context).ceQueVousPouvezFaireAvec, onTap: () async {
+            if (!await exigerPremium(context, ref, fonction: L.of(context).cuisinerAvecMonFrigo)) return;
             if (!context.mounted) return;
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FrigoScreen()));
           }),
-          _MenuCard(icon: 'ic-assistant', title: 'Mes créateurs préférés', desc: 'Dites-nous qui suivre, on va chercher leurs recettes.', onTap: () async {
-            if (!await exigerCompte(context, ref, fonction: 'Proposer un créateur')) return;
+          _MenuCard(icon: L.of(context).icAssistant, title: L.of(context).mesCreateursPreferes, desc: L.of(context).ditesNousQuiSuivreOnVa, onTap: () async {
+            if (!await exigerCompte(context, ref, fonction: L.of(context).proposerUnCreateur)) return;
             if (!context.mounted) return;
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateursScreen()));
           }),

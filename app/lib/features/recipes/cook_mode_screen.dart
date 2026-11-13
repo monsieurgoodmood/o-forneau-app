@@ -9,6 +9,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/recipe.dart';
 import 'minuteur.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Mode cuisine plein écran, mains libres : étape par étape, gros texte, minuteur par étape,
 /// écran anti-veille, lecture vocale des étapes et commandes vocales fr-FR
@@ -74,11 +75,11 @@ class _CookModeScreenState extends State<CookModeScreen> {
       );
     }
     if (!_sttReady) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Micro indisponible. Autorisez-le dans les réglages.')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L.of(context).microIndisponibleAutorisezLeDansLes)));
       return;
     }
-    setState(() { _voice = true; _status = 'Je vous écoute'; });
-    await _speak('Mode vocal activé. Dites : étape suivante, précédent, répète, minuteur, ou terminé.');
+    setState(() { _voice = true; _status = L.of(context).jeVousEcoute; });
+    await _speak(L.of(context).modeVocalActiveDitesEtapeSuivante);
     await _speakStep();
   }
 
@@ -115,19 +116,19 @@ class _CookModeScreenState extends State<CookModeScreen> {
     if (h.contains('répèt') || h.contains('repet') || h.contains('encore')) { _speakStep(); return; }
     if (h.contains('minuteur') || h.contains('chrono') || h.contains('lance')) {
       final s = _steps[_index].seconds;
-      if (s != null && s > 0) { _startTimer(s); _speak('Minuteur lancé, ${_fmtSpoken(s)}.'); } else { _speak('Pas de minuteur pour cette étape.'); }
+      if (s != null && s > 0) { _startTimer(s); _speak('Minuteur lancé, ${_fmtSpoken(s)}.'); } else { _speak(L.of(context).pasDeMinuteurPourCetteEtape); }
       return;
     }
-    if (h.contains('pause')) { _pauseTimer(); _speak('Minuteur en pause.'); return; }
-    if (h.contains('reprend') || h.contains('continue')) { _reprendreTimer(); _speak('Minuteur repris.'); return; }
-    if (h.contains('stop') || h.contains('arrête')) { _arreterTimer(); _speak('Minuteur arrêté.'); return; }
-    if (h.contains('terminé') || h.contains('fini') || h.contains('quitte')) { _speak('Bon appétit.').then((_) { if (mounted) Navigator.pop(context); }); return; }
+    if (h.contains('pause')) { _pauseTimer(); _speak(L.of(context).minuteurEnPause); return; }
+    if (h.contains('reprend') || h.contains('continue')) { _reprendreTimer(); _speak(L.of(context).minuteurRepris); return; }
+    if (h.contains('stop') || h.contains('arrête')) { _arreterTimer(); _speak(L.of(context).minuteurArrete); return; }
+    if (h.contains('terminé') || h.contains('fini') || h.contains('quitte')) { _speak(L.of(context).bonAppetit).then((_) { if (mounted) Navigator.pop(context); }); return; }
     if (_voice) _listen();
   }
 
   // ---------- Navigation ----------
   void _next() {
-    if (_index >= _steps.length - 1) { _speak('C’était la dernière étape. Bon appétit.'); return; }
+    if (_index >= _steps.length - 1) { _speak(L.of(context).cEtaitLaDerniereEtapeBon); return; }
     _controller.nextPage(duration: const Duration(milliseconds: 240), curve: Curves.easeOut);
   }
 
@@ -153,7 +154,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
         tm.cancel();
         setState(_minuteur.arreter);
         HapticFeedback.heavyImpact();
-        _speak('Minuteur terminé.');
+        _speak(L.of(context).minuteurTermine);
       } else {
         setState(() {});
       }
@@ -201,7 +202,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
                       style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, fontSize: 18)),
                 ),
                 IconButton(
-                  tooltip: _voice ? 'Désactiver le vocal' : 'Activer le vocal',
+                  tooltip: _voice ? L.of(context).desactiverLeVocal : L.of(context).activerLeVocal,
                   onPressed: _toggleVoice,
                   icon: Icon(_voice ? Icons.mic : Icons.mic_none, color: _voice ? AppColors.green : AppColors.muted),
                 ),
@@ -217,7 +218,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
                 child: Row(children: [
                   const Icon(Icons.graphic_eq, size: 16, color: AppColors.green),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(_status.isEmpty ? 'Je vous écoute' : _status, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.textTheme.labelMedium?.copyWith(color: AppColors.greenDeep))),
+                  Expanded(child: Text(_status.isEmpty ? L.of(context).jeVousEcoute : _status, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.textTheme.labelMedium?.copyWith(color: AppColors.greenDeep))),
                   Text('« suivante » · « répète » · « minuteur »', style: t.textTheme.labelSmall),
                 ]),
               ),
@@ -242,7 +243,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
                             onPressed: () => _startTimer(step.seconds!),
                             style: _pill,
                             icon: const Icon(Icons.timer_outlined),
-                            label: Text(_minuteurArme && _minuteur.etape == i ? 'Relancer le minuteur' : 'Lancer ${_fmt(step.seconds!)}'),
+                            label: Text(_minuteurArme && _minuteur.etape == i ? L.of(context).relancerLeMinuteur : 'Lancer ${_fmt(step.seconds!)}'),
                           ),
                         ])),
                     ]),
@@ -268,12 +269,12 @@ class _CookModeScreenState extends State<CookModeScreen> {
                     child: const Text('Voir'),
                   ),
                   IconButton(
-                    tooltip: _minuteur.enPause ? 'Reprendre le minuteur' : 'Mettre le minuteur en pause',
+                    tooltip: _minuteur.enPause ? L.of(context).reprendreLeMinuteur : L.of(context).mettreLeMinuteurEnPause,
                     icon: Icon(_minuteur.enPause ? Icons.play_arrow : Icons.pause, color: AppColors.green),
                     onPressed: _minuteur.enPause ? _reprendreTimer : _pauseTimer,
                   ),
                   IconButton(
-                    tooltip: 'Arrêter le minuteur',
+                    tooltip: L.of(context).arreterLeMinuteur,
                     icon: const Icon(Icons.close, color: AppColors.muted),
                     onPressed: _arreterTimer,
                   ),
@@ -282,9 +283,9 @@ class _CookModeScreenState extends State<CookModeScreen> {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.s16),
               child: Row(children: [
-                if (_index > 0) Expanded(child: OutlinedButton(onPressed: _prev, style: _pill, child: const Text('Précédent'))),
+                if (_index > 0) Expanded(child: OutlinedButton(onPressed: _prev, style: _pill, child: Text(L.of(context).precedent))),
                 if (_index > 0) const SizedBox(width: AppSpacing.s16),
-                Expanded(child: FilledButton(onPressed: last ? () => Navigator.pop(context) : _next, child: Text(last ? 'Terminé' : 'Étape suivante'))),
+                Expanded(child: FilledButton(onPressed: last ? () => Navigator.pop(context) : _next, child: Text(last ? 'Terminé' : L.of(context).etapeSuivante))),
               ]),
             ),
           ],

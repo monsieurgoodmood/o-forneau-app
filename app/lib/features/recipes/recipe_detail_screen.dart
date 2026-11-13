@@ -15,6 +15,7 @@ import 'cook_mode_screen.dart';
 import 'reviews_section.dart';
 import '../frigo/courses_screen.dart';
 import '../acces/paywall_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Fiche recette — réplique du web (hero, pastilles, bloc ustensile Forneau, Mode cuisine).
 class RecipeDetailScreen extends ConsumerStatefulWidget {
@@ -53,7 +54,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     }
 
     // Les portions choisies sont memorisees : sans ca, la liste de courses retombait
-    // sur les portions d'origine des qu'on quittait la fiche (ticket A05).
+    // sur les portions dL.of(context).origineDesQuon quittait la fiche (ticket A05).
     final servings = _servings ?? ref.watch(portionsProvider.notifier).pour(recipe);
     final factor = recipe.serv == 0 ? 1.0 : servings / recipe.serv;
     final margin = AppSpacing.screenMargin(MediaQuery.sizeOf(context).width);
@@ -124,7 +125,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 }),
                 const SizedBox(height: AppSpacing.s24),
 
-                _SectionTitle('Ingrédients'),
+                _SectionTitle(L.of(context).ingredients),
                 ...recipe.ingredients.map((ing) => _IngredientRow(ing: ing, factor: factor)),
                 const SizedBox(height: AppSpacing.s24),
 
@@ -133,7 +134,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   const SizedBox(height: AppSpacing.s24),
                 ],
 
-                _SectionTitle('Préparation'),
+                _SectionTitle(L.of(context).preparation),
                 // Les etapes sont redigees pour les portions d origine : « les quatre
                 // tranches » reste ecrit meme a cinq portions. Plutot que de laisser la
                 // contradiction muette, on la nomme et on renvoie a la liste, elle juste
@@ -150,9 +151,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       const Icon(Icons.info_outline, size: 18, color: AppColors.green),
                       const SizedBox(width: AppSpacing.s8),
                       Expanded(child: Text(
-                        'Vous cuisinez pour $servings. Les nombres cités dans les étapes '
-                        'valent pour ${recipe.serv == 0 ? 2 : recipe.serv} portions : '
-                        'fiez-vous à la liste d’ingrédients ci-dessus, déjà ajustée.',
+                        'Vous cuisinez pour $servings. Les nombres cités dans les étapes valent pour ${recipe.serv == 0 ? 2 : recipe.serv} portions : fiez-vous à la liste d’ingrédients ci-dessus, déjà ajustée.',
                         style: t.textTheme.bodyMedium?.copyWith(color: AppColors.greenDeep),
                       )),
                     ]),
@@ -161,9 +160,31 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
                 if (recipe.macros != null) ...[
                   const SizedBox(height: AppSpacing.s24),
-                  _SectionTitle('Valeurs par portion'),
+                  _SectionTitle(L.of(context).valeursParPortion),
                   _MacrosRow(macros: recipe.macros!),
                 ],
+                const SizedBox(height: AppSpacing.s24),
+                // D'ou vient cette recette. La page commerciale annonce des recettes
+                // reperees sur les reseaux ; les fiches n'en disaient rien, ce qui
+                // laissait un flottement (ticket A13). On dit ce qu'on fait, sans
+                // nommer de createur : la reecriture integrale et les visuels maison
+                // sont precisement ce qui rend la publication legitime.
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.s16),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(AppRadius.r16),
+                    border: Border.all(color: AppColors.line),
+                  ),
+                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Icon(Icons.edit_note, size: 18, color: AppColors.muted),
+                    const SizedBox(width: AppSpacing.s8),
+                    Expanded(child: Text(
+                      L.of(context).recetteRepereeDansLesTendancesCulinaires,
+                      style: t.textTheme.labelSmall,
+                    )),
+                  ]),
+                ),
                 const SizedBox(height: AppSpacing.s32),
                 ReviewsSection(slug: recipe.slug),
               ]),
@@ -252,7 +273,7 @@ class _UstensileCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('USTENSILE FORNEAU', style: AppTypography.eyebrow(AppColors.gold)),
+                Text(L.of(context).ustensileForneau, style: AppTypography.eyebrow(AppColors.gold)),
                 const SizedBox(height: 4),
                 Text(product.name, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, fontSize: 19)),
                 Text(product.tagline, style: t.textTheme.bodyMedium),
@@ -262,7 +283,7 @@ class _UstensileCard extends StatelessWidget {
           if (product.have)
             TextButton(
               onPressed: () => launchUrl(Uri.parse(product.url), mode: LaunchMode.externalApplication),
-              child: Text('Voir le produit', style: t.textTheme.labelMedium?.copyWith(color: AppColors.green)),
+              child: Text(L.of(context).voirLeProduit, style: t.textTheme.labelMedium?.copyWith(color: AppColors.green)),
             ),
         ],
       ),
@@ -437,7 +458,7 @@ class _MacrosRow extends StatelessWidget {
       decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
       child: Row(children: [
         cell('${macros.kcal}', 'kcal'),
-        cell('${macros.p} g', 'Protéines'),
+        cell('${macros.p} g', L.of(context).proteines),
         cell('${macros.l} g', 'Lipides'),
         cell('${macros.g} g', 'Glucides'),
       ]),
@@ -463,7 +484,7 @@ class _CookBar extends StatelessWidget {
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () async {
-                if (!await exigerPremium(context, ref, fonction: 'La liste de courses')) return;
+                if (!await exigerPremium(context, ref, fonction: L.of(context).laListeDeCourses)) return;
                 if (!context.mounted) return;
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CoursesScreen()));
               },
@@ -477,12 +498,12 @@ class _CookBar extends StatelessWidget {
                   ? null
                   : () async {
                       // Le mode cuisine (et son pilotage vocal) fait partie des fonctions premium.
-                      if (!await exigerPremium(context, ref, fonction: 'Le mode cuisine')) return;
+                      if (!await exigerPremium(context, ref, fonction: L.of(context).leModeCuisine)) return;
                       if (!context.mounted) return;
                       Navigator.of(context).push(MaterialPageRoute(builder: (_) => CookModeScreen(recipe: recipe)));
                     },
               icon: const Icon(Icons.play_arrow),
-              label: const Text('Mode cuisine'),
+              label: Text(L.of(context).modeCuisine),
             ),
           ),
         ],

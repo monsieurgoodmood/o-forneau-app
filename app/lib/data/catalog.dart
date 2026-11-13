@@ -25,12 +25,24 @@ class DietDef {
   const DietDef(this.long, this.short);
 }
 
+/// ⚠️ « sans gluten » et « sans lactose » ont été RETIRÉS d'ici : aucune recette ne
+/// portait ces étiquettes, le filtre renvoyait donc toujours zéro résultat et laissait
+/// croire que le catalogue était vide. Ces deux besoins passent désormais par
+/// l'exclusion d'allergene, calculée à partir des ingrédients (ticket A02).
 const Map<String, DietDef> kDiets = {
   'vegan': DietDef('100 % végétale', 'Végétale'),
   'vegetarien': DietDef('Végétarien', 'Végétarien'),
-  'sans_gluten': DietDef('Sans gluten', 'Sans gluten'),
-  'sans_lactose': DietDef('Sans lactose', 'Sans lactose'),
   'hypocalorique': DietDef('Léger', 'Léger'),
+};
+
+/// Allergenes (annexe II du règlement 1169/2011). Calculés depuis les ingredients par
+/// le pipeline, jamais saisis à la main. Ce tri est un confort, pas une certification :
+/// les traces de fabrication ne sont pas connues.
+const Map<String, String> kAllergenes = {
+  'gluten': 'Gluten', 'crustaces': 'Crustacés', 'oeufs': 'Œufs', 'poissons': 'Poissons',
+  'arachides': 'Arachides', 'soja': 'Soja', 'lait': 'Lait', 'fruits_a_coque': 'Fruits à coque',
+  'celeri': 'Céleri', 'moutarde': 'Moutarde', 'sesame': 'Sésame', 'sulfites': 'Sulfites',
+  'lupin': 'Lupin', 'mollusques': 'Mollusques',
 };
 
 /// Ustensile Forneau : n = nom complet, d = tagline, have = vrai produit, h = handle forneau.com.
