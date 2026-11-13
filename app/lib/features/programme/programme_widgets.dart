@@ -76,7 +76,10 @@ class ChoiceCard extends StatelessWidget {
   final String? sub;
   final bool on;
   final VoidCallback onTap;
-  const ChoiceCard({super.key, required this.icon, required this.label, this.sub, required this.on, required this.onTap});
+  /// null = la carte prend la largeur que son parent lui donne. Une largeur figee
+  /// deborde des le premier telephone etroit : c'est ce qui coupait les choix du programme.
+  final double? width;
+  const ChoiceCard({super.key, required this.icon, required this.label, this.sub, required this.on, required this.onTap, this.width});
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
@@ -87,7 +90,7 @@ class ChoiceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.r16),
         onTap: onTap,
         child: Container(
-          width: 150,
+          width: width,
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.s16, horizontal: AppSpacing.s8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.r16),

@@ -57,7 +57,8 @@ class Recipe {
   final List<String> diets;
   final List<String> appl; // appareils requis (poele, four, ...)
   final int active; // min préparation active
-  final int total; // min total
+  final int total; // min total, repos compris
+  final int rest; // min de repos passif (froid, levee) inclus dans total
   final String diff; // difficulté
   final int serv; // portions de base
   final List<Ingredient> ingredients;
@@ -66,6 +67,7 @@ class Recipe {
   final Macros? macros;
   final List<String> meal; // petit-dej, dejeuner, diner, gouter, encas, proteine, dessert
   final String img; // chemin relatif sur app.forneau.com
+  final String role; // plat | sauce | base : une sauce ne tient pas lieu de repas
 
   const Recipe({
     required this.slug,
@@ -76,6 +78,7 @@ class Recipe {
     required this.appl,
     required this.active,
     required this.total,
+    this.rest = 0,
     required this.diff,
     required this.serv,
     required this.ingredients,
@@ -84,6 +87,7 @@ class Recipe {
     required this.macros,
     required this.meal,
     required this.img,
+    this.role = 'plat',
   });
 
   String get imageUrl => img.isEmpty ? '' : 'https://app.forneau.com/$img';
@@ -107,6 +111,7 @@ class Recipe {
       appl: strList(j['appl']),
       active: (j['active'] is num) ? (j['active'] as num).toInt() : 0,
       total: (j['total'] is num) ? (j['total'] as num).toInt() : 0,
+      rest: (j['rest'] is num) ? (j['rest'] as num).toInt() : 0,
       diff: j['diff']?.toString() ?? '',
       serv: (j['serv'] is num) ? (j['serv'] as num).toInt() : 2,
       ingredients: ing,
@@ -115,6 +120,7 @@ class Recipe {
       macros: Macros.fromMap(j['macros']),
       meal: strList(j['meal']),
       img: j['img']?.toString() ?? '',
+      role: (j['role']?.toString().isNotEmpty ?? false) ? j['role'].toString() : 'plat',
     );
   }
 }

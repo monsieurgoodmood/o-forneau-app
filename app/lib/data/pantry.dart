@@ -99,9 +99,15 @@ class _SetNotifier extends StateNotifier<Set<String>> {
     try {
       final row = await supabase.from('user_profiles').select('app_state').eq('id', user.id).maybeSingle();
       final cloud = (row?['app_state'] is Map) ? (row!['app_state'] as Map)[_key] : null;
-      if (cloud is List) {
-        final merged = Set<String>.from(state)..addAll(cloud.map((e) => e.toString()));
-        if (merged.length != state.length) { state = merged; await _save(); }
+      final merged = Set<String>.from(state);
+      if (cloud is List) merged.addAll(cloud.map((e) => e.toString()));
+      if (merged.length != state.length) {
+        state = merged;
+        await _save();
+      } else if (merged.isNotEmpty) {
+        // Meme raison que pour les favoris : ce qui a ete saisi en invite doit rejoindre
+        // le compte, y compris quand le nuage est vide (ticket A19).
+        await _save();
       }
     } catch (_) {}
   }

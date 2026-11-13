@@ -146,13 +146,33 @@ List<String> foyerDiets(Foyer foyer, Prog prog) {
   return [prog.me.diet];
 }
 
-Recipe? pickMeal(List<Recipe> all, String cat, int off, List<String> diets, int seed) {
+/// Part de la journée attribuée à chaque repas. Sans ces parts, le planificateur
+/// prenait n'importe quelle recette du bon créneau : l'audit a mesuré des journées à
+/// 989 kcal en face d'une cible affichée de 2 000 (ticket A03).
+const kPartRepas = <String, double>{
+  'petit-dej': 0.25, 'dejeuner': 0.35, 'diner': 0.30, 'gouter': 0.10,
+};
+
+/// Combien de candidats on garde autour de la cible avant de laisser le hasard choisir.
+/// Trop étroit, « Régénérer » rendrait toujours la même journée ; trop large, la cible
+/// ne veut plus rien dire.
+const _candidats = 8;
+
+Recipe? pickMeal(List<Recipe> all, String cat, int off, List<String> diets, int seed,
+    {int cibleKcal = 0}) {
   var pool = all.where((r) => r.macros != null && r.meal.contains(cat) && recipeMatchesAll(r, diets)).toList();
   if (pool.isEmpty) pool = all.where((r) => r.macros != null && r.meal.contains(cat)).toList();
   if (pool.isEmpty) pool = all.where((r) => r.macros != null && recipeMatchesAll(r, diets)).toList();
   if (pool.isEmpty) pool = all.where((r) => r.macros != null).toList();
   if (pool.isEmpty) return all.isEmpty ? null : all.first;
-  return pool[(seed + off) % pool.length];
+
+  if (cibleKcal <= 0) return pool[(seed + off) % pool.length];
+
+  final visee = cibleKcal * (kPartRepas[cat] ?? 0.3);
+  final trie = [...pool]..sort((a, b) =>
+      (a.macros!.kcal - visee).abs().compareTo((b.macros!.kcal - visee).abs()));
+  final retenus = trie.take(_candidats < trie.length ? _candidats : trie.length).toList();
+  return retenus[(seed + off) % retenus.length];
 }
 
 class PlanItem {
@@ -161,10 +181,11 @@ class PlanItem {
   const PlanItem(this.label, this.recipe);
 }
 
-List<PlanItem> buildPlan(List<Recipe> all, List<String> diets, int seed, {bool gouter = false}) {
+List<PlanItem> buildPlan(List<Recipe> all, List<String> diets, int seed,
+    {bool gouter = false, int cibleKcal = 0}) {
   final out = <PlanItem>[];
   void add(String l, String cat, int off) {
-    final r = pickMeal(all, cat, off, diets, seed);
+    final r = pickMeal(all, cat, off, diets, seed, cibleKcal: cibleKcal);
     if (r != null) out.add(PlanItem(l, r));
   }
   add('Petit-déjeuner', 'petit-dej', 0);
@@ -173,6 +194,20 @@ List<PlanItem> buildPlan(List<Recipe> all, List<String> diets, int seed, {bool g
   if (gouter) add('Goûter', 'gouter', 0);
   return out;
 }
+
+/// Total réellement proposé par la journée.
+int totalKcal(List<PlanItem> plan) =>
+    plan.fold(0, (s, p) => s + (p.recipe.macros?.kcal ?? 0));
+
+/// Écart relatif à la cible, pour pouvoir le DIRE au lieu de le masquer.
+/// 0,12 = la journée s'écarte de 12 % de la cible.
+double ecartCible(List<PlanItem> plan, int cibleKcal) {
+  if (cibleKcal <= 0) return 0;
+  return (totalKcal(plan) - cibleKcal).abs() / cibleKcal;
+}
+
+/// Au-delà, on avertit plutôt que de laisser croire à une journée calibrée.
+const kToleranceCible = 0.15;
 
 // ---------- Persistance (locale + cloud app_state, même clés que le web) ----------
 
@@ -230,6 +265,10 @@ final gouterProvider = StateProvider<bool>((ref) => false);
 /// Menu du jour compatible avec tous les régimes du foyer.
 final dailyPlanProvider = Provider<List<PlanItem>>((ref) {
   final all = ref.watch(recipesProvider).asData?.value ?? const <Recipe>[];
-  final diets = foyerDiets(ref.watch(foyerProvider), ref.watch(progProvider));
-  return buildPlan(all, diets, ref.watch(menuSeedProvider), gouter: ref.watch(gouterProvider));
+  final prog = ref.watch(progProvider);
+  final diets = foyerDiets(ref.watch(foyerProvider), prog);
+  // La cible guide la composition : sans elle, la journee tombait ou elle voulait.
+  final cible = progTarget(prog).kcal;
+  return buildPlan(all, diets, ref.watch(menuSeedProvider),
+      gouter: ref.watch(gouterProvider), cibleKcal: cible);
 });

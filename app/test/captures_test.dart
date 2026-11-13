@@ -29,6 +29,7 @@ import 'package:o_forneau/features/acces/claim_order_screen.dart';
 import 'package:o_forneau/features/acces/paywall_screen.dart';
 import 'package:o_forneau/features/auth/exiger_compte.dart';
 import 'package:o_forneau/features/createurs/createurs_screen.dart';
+import 'package:o_forneau/features/programme/programme_screen.dart';
 
 const _largeur = 390.0; // iPhone 14/15
 const _densite = 3.0;
@@ -117,6 +118,10 @@ void main() {
 
   testWidgets('createurs', (tester) async {
     await _capturer(tester, const CreateursScreen(), 'createurs', hauteur: 1100);
+  });
+
+  testWidgets('programme', (tester) async {
+    await _capturer(tester, const ProgrammeScreen(), 'programme', hauteur: 1400);
   });
 
   testWidgets('commande', (tester) async {

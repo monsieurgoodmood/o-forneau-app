@@ -89,36 +89,27 @@ class ProgrammeScreen extends ConsumerWidget {
 
           // Objectif
           const Eyebrow('Votre objectif'),
-          SizedBox(
-            height: 132,
-            child: ListView(scrollDirection: Axis.horizontal, children: [
-              for (final e in kGoals.entries) ...[
-                ChoiceCard(
-                  icon: e.key == 'perte' ? Icons.local_fire_department_outlined : (e.key == 'masse' ? Icons.auto_awesome : Icons.adjust),
-                  label: e.value.label, sub: e.value.sub, on: prog.goal == e.key,
-                  onTap: () => setProg(prog.copyWith(goal: e.key)),
-                ),
-                const SizedBox(width: AppSpacing.s16),
-              ],
-            ]),
-          ),
+          _GrilleChoix(children: [
+            for (final e in kGoals.entries)
+              (double l) => ChoiceCard(
+                    width: l,
+                    icon: e.key == 'perte' ? Icons.local_fire_department_outlined : (e.key == 'masse' ? Icons.auto_awesome : Icons.adjust),
+                    label: e.value.label, sub: e.value.sub, on: prog.goal == e.key,
+                    onTap: () => setProg(prog.copyWith(goal: e.key)),
+                  ),
+          ]),
           const SizedBox(height: AppSpacing.s24),
 
           // Type d'alimentation
           const Eyebrow("Type d'alimentation"),
-          SizedBox(
-            height: 132,
-            child: ListView(scrollDirection: Axis.horizontal, children: [
-              for (final e in kDietPlans.entries) ...[
-                ChoiceCard(
-                  icon: Icons.eco_outlined,
-                  label: e.value.label, sub: e.value.desc, on: me.diet == e.key,
-                  onTap: () => setProg(prog.copyWith(me: me.copyWith(diet: e.key))),
-                ),
-                const SizedBox(width: AppSpacing.s16),
-              ],
-            ]),
-          ),
+          _GrilleChoix(children: [
+            for (final e in kDietPlans.entries)
+              (double l) => ChoiceCard(
+                    width: l, icon: Icons.eco_outlined,
+                    label: e.value.label, sub: e.value.desc, on: me.diet == e.key,
+                    onTap: () => setProg(prog.copyWith(me: me.copyWith(diet: e.key))),
+                  ),
+          ]),
           const SizedBox(height: AppSpacing.s24),
 
           // Besoins
@@ -160,12 +151,30 @@ class ProgrammeScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: AppSpacing.s8),
           Builder(builder: (_) {
-            final total = plan.fold<int>(0, (a, i) => a + (i.recipe.macros?.kcal ?? 0));
+            final total = totalKcal(plan);
             final pct = (total / (target.kcal < 1 ? 1 : target.kcal)).clamp(0.0, 1.0);
+            final ecart = ecartCible(plan, target.kcal);
+            // Un profil sans taille ni poids ne donne pas une cible personnelle : on
+            // le dit, au lieu de laisser croire a un calcul sur mesure (ticket A03).
+            final surMesure = me.taille > 0 && me.poids > 0;
             return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('$total kcal sur ${target.kcal} (par portion)', style: t.textTheme.labelMedium),
+              Text(surMesure
+                      ? '$total kcal sur ${target.kcal} (par portion)'
+                      : 'Exemple de journée : $total kcal, pour un repere de ${target.kcal}',
+                  style: t.textTheme.labelMedium),
               const SizedBox(height: 6),
               ClipRRect(borderRadius: BorderRadius.circular(999), child: LinearProgressIndicator(value: pct, minHeight: 8, backgroundColor: AppColors.greenSoft, color: AppColors.green)),
+              if (ecart > kToleranceCible) ...[
+                const SizedBox(height: AppSpacing.s8),
+                Text('Cette journée s’écarte de ${(ecart * 100).round()} % du repere. '
+                    'Régénérez-la, ou complétez votre profil pour un calcul plus juste.',
+                    style: t.textTheme.labelSmall?.copyWith(color: AppColors.gold)),
+              ],
+              if (!surMesure) ...[
+                const SizedBox(height: 4),
+                Text('Renseignez taille et poids pour une cible personnelle.',
+                    style: t.textTheme.labelSmall),
+              ],
             ]);
           }),
         ],
@@ -223,5 +232,27 @@ class _PlanCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Grille de choix qui ne deborde jamais : deux colonnes sur telephone, trois des que
+/// la largeur le permet. Remplace les listes horizontales, qui coupaient le dernier
+/// choix au bord de l ecran et obligeaient a deviner qu il fallait faire glisser.
+class _GrilleChoix extends StatelessWidget {
+  final List<Widget Function(double largeur)> children;
+  const _GrilleChoix({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, c) {
+      const espace = AppSpacing.s8;
+      final colonnes = c.maxWidth >= 560 ? 3 : 2;
+      final largeur = (c.maxWidth - espace * (colonnes - 1)) / colonnes;
+      return Wrap(
+        spacing: espace,
+        runSpacing: espace,
+        children: [for (final f in children) f(largeur)],
+      );
+    });
   }
 }

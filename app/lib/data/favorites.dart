@@ -42,14 +42,17 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
     try {
       final row = await supabase.from('user_profiles').select('app_state').eq('id', user.id).maybeSingle();
       final cloud = (row?['app_state'] is Map) ? (row!['app_state'] as Map)['favs'] : null;
-      if (cloud is List) {
-        final merged = Set<String>.from(state)..addAll(cloud.map((e) => e.toString()));
-        if (merged.length != state.length) {
-          state = merged;
-          await _prefs.setString(_key, jsonEncode(merged.toList()));
-          _pushToCloud();
-        }
+      final merged = Set<String>.from(state);
+      if (cloud is List) merged.addAll(cloud.map((e) => e.toString()));
+      if (merged.length != state.length) {
+        state = merged;
+        await _prefs.setString(_key, jsonEncode(merged.toList()));
       }
+      // On remonte TOUJOURS l'union, meme si le nuage n'a rien apporte : sinon les
+      // favoris pris en mode invite ne rejoignent jamais le compte qu'on vient de creer
+      // (ticket A19). La condition precedente ne poussait que si le nuage etait plus
+      // riche que le local, c'est-a-dire jamais dans ce cas-la.
+      if (merged.isNotEmpty) _pushToCloud();
     } catch (_) {}
   }
 

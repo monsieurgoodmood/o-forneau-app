@@ -15,6 +15,7 @@ import '../programme/programme_screen.dart';
 import '../home/home_screen.dart';
 import '../auth/account_screen.dart';
 import '../acces/paywall_screen.dart';
+import '../frigo/courses_screen.dart';
 
 /// Accueil « Les recettes » — réplique du web (crème, wordmark, cartes éditoriales).
 class RecipesListScreen extends ConsumerWidget {
@@ -420,8 +421,19 @@ class _BottomNav extends ConsumerWidget {
         height: 64,
         onDestinationSelected: (i) {
           if (i == 1) return;
-          if (i == 3) {
+          if (i == 4) {
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FavoritesScreen()));
+            return;
+          }
+          if (i == 3) {
+            // Les courses se preparent depuis le telephone, dans la cuisine ou dans le
+            // magasin : elles ne peuvent pas vivre uniquement derriere une fiche recette
+            // comme c etait le cas sur mobile (ticket A22).
+            () async {
+              if (!await exigerPremium(context, ref, fonction: 'La liste de courses')) return;
+              if (!context.mounted) return;
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CoursesScreen()));
+            }();
             return;
           }
           if (i == 2) {
@@ -441,6 +453,7 @@ class _BottomNav extends ConsumerWidget {
           NavigationDestination(icon: Icon(Icons.home_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.home, color: AppColors.green), label: 'Accueil'),
           NavigationDestination(icon: Icon(Icons.explore_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.explore, color: AppColors.green), label: 'Recettes'),
           NavigationDestination(icon: Icon(Icons.tune_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.tune, color: AppColors.green), label: 'Programme'),
+          NavigationDestination(icon: Icon(Icons.shopping_basket_outlined, color: AppColors.muted), selectedIcon: Icon(Icons.shopping_basket, color: AppColors.green), label: 'Courses'),
           NavigationDestination(icon: Icon(Icons.favorite_border, color: AppColors.muted), selectedIcon: Icon(Icons.favorite, color: AppColors.green), label: 'Favoris'),
         ],
       ),

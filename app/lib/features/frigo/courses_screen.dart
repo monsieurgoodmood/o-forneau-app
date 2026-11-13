@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/favorites.dart';
+import '../../data/courses.dart';
 import '../../data/pantry.dart';
 import '../../data/recipes_repository.dart';
 
@@ -21,15 +22,15 @@ class CoursesScreen extends ConsumerWidget {
     final all = ref.watch(recipesProvider).asData?.value ?? const [];
     final margin = AppSpacing.screenMargin(MediaQuery.sizeOf(context).width);
 
-    final groups = <String, List<String>>{};
-    for (final r in all.where((r) => favs.contains(r.slug))) {
-      for (final ing in r.ingredients) {
-        final n = norm(ing.name);
-        if (pantry.isNotEmpty && pantry.any((p) => n.contains(p) || p.contains(n))) continue;
-        (groups[ing.name] ??= []).add(r.title);
-      }
-    }
-    final items = groups.keys.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    // Les quantites suivent jusqu'ici, a la portion choisie recette par recette :
+    // une liste qui dit « pain de mie » sans dire combien oblige a rouvrir la fiche
+    // dans le magasin (ticket A05).
+    final portions = ref.watch(portionsProvider.notifier);
+    final lignes = construireCourses(
+      recettes: all.where((r) => favs.contains(r.slug)).toList(),
+      portionsDe: portions.pour,
+      exclus: pantry,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.cream,
@@ -40,7 +41,7 @@ class CoursesScreen extends ConsumerWidget {
         title: Text('Liste de courses', style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep)),
         actions: [if (cart.isNotEmpty) TextButton(onPressed: () => ref.read(cartProvider.notifier).clear(), child: const Text('Décocher tout', style: TextStyle(color: AppColors.muted)))],
       ),
-      body: items.isEmpty
+      body: lignes.isEmpty
           ? Center(
               child: Padding(
                 padding: EdgeInsets.all(margin * 2),
@@ -58,19 +59,26 @@ class CoursesScreen extends ConsumerWidget {
               children: [
                 Text('À ACHETER', style: AppTypography.eyebrow(AppColors.gold)),
                 const SizedBox(height: AppSpacing.s8),
-                Text('${items.length} article${items.length > 1 ? 's' : ''}', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
+                Text('${lignes.length} article${lignes.length > 1 ? 's' : ''}', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
                 const SizedBox(height: AppSpacing.s16),
-                for (final n in items)
+                for (final ligne in lignes)
                   Container(
                     margin: const EdgeInsets.only(bottom: AppSpacing.s8),
                     decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
                     child: CheckboxListTile(
-                      value: cart.contains(n),
+                      value: cart.contains(ligne.nom),
                       activeColor: AppColors.green,
                       controlAffinity: ListTileControlAffinity.leading,
-                      onChanged: (_) => ref.read(cartProvider.notifier).toggle(n),
-                      title: Text(n, style: t.textTheme.bodyLarge?.copyWith(decoration: cart.contains(n) ? TextDecoration.lineThrough : null, color: cart.contains(n) ? AppColors.muted : AppColors.ink)),
-                      subtitle: Text('${groups[n]!.first}${groups[n]!.length > 1 ? ' +${groups[n]!.length - 1}' : ''}', style: t.textTheme.labelSmall),
+                      onChanged: (_) => ref.read(cartProvider.notifier).toggle(ligne.nom),
+                      title: Text(
+                        ligne.quantite.isEmpty ? ligne.nom : '${ligne.quantite} · ${ligne.nom}',
+                        style: t.textTheme.bodyLarge?.copyWith(
+                          decoration: cart.contains(ligne.nom) ? TextDecoration.lineThrough : null,
+                          color: cart.contains(ligne.nom) ? AppColors.muted : AppColors.ink),
+                      ),
+                      subtitle: Text(
+                        '${ligne.recettes.first}${ligne.recettes.length > 1 ? ' +${ligne.recettes.length - 1}' : ''}',
+                        style: t.textTheme.labelSmall),
                     ),
                   ),
               ],

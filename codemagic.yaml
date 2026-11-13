@@ -50,7 +50,7 @@ workflows:
           # Les clés RevenueCat viennent du groupe de variables « forneau_ios » (chiffrées,
           # jamais dans ce dépôt public). Sans elles, l'app compile mais l'achat intégré reste muet.
           cd app && flutter build ipa --release \
-            --build-name=1.3.0 --build-number="$N" \
+            --build-name=1.4.0 --build-number="$N" \
             --dart-define=RC_IOS_KEY="$RC_IOS_KEY" \
             --dart-define=RC_ANDROID_KEY="$RC_ANDROID_KEY" \
             --export-options-plist=/Users/builder/export_options.plist

@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/recipe.dart';
+import 'minuteur.dart';
 
 /// Mode cuisine plein écran, mains libres : étape par étape, gros texte, minuteur par étape,
 /// écran anti-veille, lecture vocale des étapes et commandes vocales fr-FR
@@ -25,13 +26,19 @@ class _CookModeScreenState extends State<CookModeScreen> {
   final _tts = FlutterTts();
   int _index = 0;
   Timer? _timer;
-  int _remaining = 0;
+  /// Le minuteur appartient a une ETAPE, pas a l ecran, et se calcule sur une echeance
+  /// absolue : il survit a la navigation et ne derive pas quand le telephone se
+  /// verrouille (ticket A09). Logique isolee dans [MinuteurEtape], couverte par 11 tests.
+  final _minuteur = MinuteurEtape();
   bool _voice = false; // pilotage vocal actif
   bool _sttReady = false;
   bool _speaking = false;
   String _status = '';
 
   List<RecipeStep> get _steps => widget.recipe.steps;
+
+  int get _restant => _minuteur.restant;
+  bool get _minuteurArme => _minuteur.arme;
 
   @override
   void initState() {
@@ -111,7 +118,9 @@ class _CookModeScreenState extends State<CookModeScreen> {
       if (s != null && s > 0) { _startTimer(s); _speak('Minuteur lancé, ${_fmtSpoken(s)}.'); } else { _speak('Pas de minuteur pour cette étape.'); }
       return;
     }
-    if (h.contains('pause') || h.contains('stop') || h.contains('arrête')) { _timer?.cancel(); setState(() => _remaining = 0); _speak('Minuteur arrêté.'); return; }
+    if (h.contains('pause')) { _pauseTimer(); _speak('Minuteur en pause.'); return; }
+    if (h.contains('reprend') || h.contains('continue')) { _reprendreTimer(); _speak('Minuteur repris.'); return; }
+    if (h.contains('stop') || h.contains('arrête')) { _arreterTimer(); _speak('Minuteur arrêté.'); return; }
     if (h.contains('terminé') || h.contains('fini') || h.contains('quitte')) { _speak('Bon appétit.').then((_) { if (mounted) Navigator.pop(context); }); return; }
     if (_voice) _listen();
   }
@@ -128,25 +137,44 @@ class _CookModeScreenState extends State<CookModeScreen> {
   }
 
   void _onPage(int i) {
-    _timer?.cancel();
-    setState(() { _index = i; _remaining = 0; });
+    // On NE coupe PAS le minuteur : une personne qui revoit l etape precedente
+    // pendant que ca cuit ne doit pas perdre son decompte.
+    setState(() => _index = i);
     if (_voice) _speakStep();
   }
 
   // ---------- Minuteur ----------
-  void _startTimer(int seconds) {
+  void _startTimer(int seconds, {int? etape}) {
     _timer?.cancel();
-    setState(() => _remaining = seconds);
+    setState(() => _minuteur.lancer(seconds, etape ?? _index));
     _timer = Timer.periodic(const Duration(seconds: 1), (tm) {
-      if (_remaining <= 1) {
+      if (!mounted) { tm.cancel(); return; }
+      if (_minuteur.termine) {
         tm.cancel();
-        setState(() => _remaining = 0);
+        setState(_minuteur.arreter);
         HapticFeedback.heavyImpact();
         _speak('Minuteur terminé.');
       } else {
-        setState(() => _remaining--);
+        setState(() {});
       }
     });
+  }
+
+  void _pauseTimer() {
+    _timer?.cancel();
+    setState(_minuteur.pause);
+  }
+
+  void _reprendreTimer() {
+    if (!_minuteur.enPause) return;
+    final reste = _minuteur.restant;
+    _minuteur.reprendre();
+    _startTimer(reste, etape: _minuteur.etape);
+  }
+
+  void _arreterTimer() {
+    _timer?.cancel();
+    setState(_minuteur.arreter);
   }
 
   String _fmt(int s) => '${(s ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}';
@@ -208,13 +236,13 @@ class _CookModeScreenState extends State<CookModeScreen> {
                       Expanded(child: SingleChildScrollView(child: Text(step.text, style: AppTypography.cookStep(AppColors.ink).copyWith(fontSize: 26, height: 1.5)))),
                       if (step.seconds != null && step.seconds! > 0)
                         Center(child: Column(children: [
-                          if (_remaining > 0) Text(_fmt(_remaining), style: t.textTheme.displayLarge?.copyWith(color: AppColors.green, fontSize: 48)),
+                          if (_minuteurArme && _minuteur.etape == i) Text(_fmt(_restant), style: t.textTheme.displayLarge?.copyWith(color: AppColors.green, fontSize: 48)),
                           const SizedBox(height: AppSpacing.s8),
                           OutlinedButton.icon(
                             onPressed: () => _startTimer(step.seconds!),
                             style: _pill,
                             icon: const Icon(Icons.timer_outlined),
-                            label: Text(_remaining > 0 ? 'Relancer le minuteur' : 'Lancer ${_fmt(step.seconds!)}'),
+                            label: Text(_minuteurArme && _minuteur.etape == i ? 'Relancer le minuteur' : 'Lancer ${_fmt(step.seconds!)}'),
                           ),
                         ])),
                     ]),
@@ -222,6 +250,35 @@ class _CookModeScreenState extends State<CookModeScreen> {
                 },
               ),
             ),
+            // Un minuteur arme sur une AUTRE etape reste visible : sinon, en revenant
+            // consulter l etape precedente, on perd de vue ce qui cuit (ticket A09).
+            if (_minuteur.ailleurs(_index))
+              Container(
+                width: double.infinity,
+                color: AppColors.greenSoft,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: 10),
+                child: Row(children: [
+                  const Icon(Icons.timer_outlined, size: 18, color: AppColors.green),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(child: Text('Étape ${_minuteur.etape! + 1} · ${_fmt(_restant)}',
+                      style: t.textTheme.titleMedium?.copyWith(color: AppColors.greenDeep))),
+                  TextButton(
+                    onPressed: () => _controller.animateToPage(_minuteur.etape!,
+                        duration: const Duration(milliseconds: 240), curve: Curves.easeOut),
+                    child: const Text('Voir'),
+                  ),
+                  IconButton(
+                    tooltip: _minuteur.enPause ? 'Reprendre le minuteur' : 'Mettre le minuteur en pause',
+                    icon: Icon(_minuteur.enPause ? Icons.play_arrow : Icons.pause, color: AppColors.green),
+                    onPressed: _minuteur.enPause ? _reprendreTimer : _pauseTimer,
+                  ),
+                  IconButton(
+                    tooltip: 'Arrêter le minuteur',
+                    icon: const Icon(Icons.close, color: AppColors.muted),
+                    onPressed: _arreterTimer,
+                  ),
+                ]),
+              ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.s16),
               child: Row(children: [

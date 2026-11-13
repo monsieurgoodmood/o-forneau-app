@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/catalog.dart';
+import '../../data/courses.dart';
 import '../../data/favorites.dart';
 import '../../data/recipe.dart';
 import '../../data/recipes_repository.dart';
@@ -22,6 +23,17 @@ class RecipeDetailScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
 }
+
+/// Temps affiche sur la fiche. Le repos passif (froid, levee) est compris dans le total
+/// mais doit se lire : une creme « 40 min » qui demande 2 h de froid trompe le lecteur.
+String _libelleTemps(Recipe r) {
+  String duree(int min) => min >= 60
+      ? (min % 60 == 0 ? '${min ~/ 60} h' : '${min ~/ 60} h ${min % 60}')
+      : '$min min';
+  final base = r.active > 0 ? '${r.active} min actifs · ${duree(r.total)}' : duree(r.total);
+  return r.rest > 0 ? '$base (dont ${duree(r.rest)} de repos)' : base;
+}
+
 
 class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   int? _servings;
@@ -40,7 +52,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       );
     }
 
-    final servings = _servings ?? (recipe.serv == 0 ? 2 : recipe.serv);
+    // Les portions choisies sont memorisees : sans ca, la liste de courses retombait
+    // sur les portions d'origine des qu'on quittait la fiche (ticket A05).
+    final servings = _servings ?? ref.watch(portionsProvider.notifier).pour(recipe);
     final factor = recipe.serv == 0 ? 1.0 : servings / recipe.serv;
     final margin = AppSpacing.screenMargin(MediaQuery.sizeOf(context).width);
     final prod = productDef(recipe.product);
@@ -85,7 +99,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
                 // Pastilles meta (temps / ustensile / difficulté)
                 Wrap(spacing: AppSpacing.s8, runSpacing: AppSpacing.s8, children: [
-                  _MetaPill(icon: Icons.schedule, label: recipe.active > 0 ? '${recipe.active} min actifs · ${recipe.total} min' : '${recipe.total} min'),
+                  _MetaPill(icon: Icons.schedule, label: _libelleTemps(recipe)),
                   _MetaPill(icon: prod.icon, label: prod.shortName),
                   _MetaPill(icon: Icons.auto_awesome, label: recipe.diff.isEmpty ? 'Facile' : recipe.diff),
                 ]),
@@ -104,7 +118,10 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 const SizedBox(height: AppSpacing.s24),
 
                 // Portions
-                _ServingsStepper(servings: servings, onChanged: (v) => setState(() => _servings = v)),
+                _ServingsStepper(servings: servings, onChanged: (v) {
+                  setState(() => _servings = v);
+                  ref.read(portionsProvider.notifier).poser(recipe.slug, v);
+                }),
                 const SizedBox(height: AppSpacing.s24),
 
                 _SectionTitle('Ingrédients'),
@@ -117,6 +134,29 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 ],
 
                 _SectionTitle('Préparation'),
+                // Les etapes sont redigees pour les portions d origine : « les quatre
+                // tranches » reste ecrit meme a cinq portions. Plutot que de laisser la
+                // contradiction muette, on la nomme et on renvoie a la liste, elle juste
+                // (ticket A07). La reecriture des textes est un travail editorial a part.
+                if (servings != (recipe.serv == 0 ? 2 : recipe.serv))
+                  Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.s16),
+                    padding: const EdgeInsets.all(AppSpacing.s16),
+                    decoration: BoxDecoration(
+                      color: AppColors.greenSoft,
+                      borderRadius: BorderRadius.circular(AppRadius.r16),
+                    ),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Icon(Icons.info_outline, size: 18, color: AppColors.green),
+                      const SizedBox(width: AppSpacing.s8),
+                      Expanded(child: Text(
+                        'Vous cuisinez pour $servings. Les nombres cités dans les étapes '
+                        'valent pour ${recipe.serv == 0 ? 2 : recipe.serv} portions : '
+                        'fiez-vous à la liste d’ingrédients ci-dessus, déjà ajustée.',
+                        style: t.textTheme.bodyMedium?.copyWith(color: AppColors.greenDeep),
+                      )),
+                    ]),
+                  ),
                 ...List.generate(recipe.steps.length, (i) => _StepRow(index: i + 1, step: recipe.steps[i])),
 
                 if (recipe.macros != null) ...[
