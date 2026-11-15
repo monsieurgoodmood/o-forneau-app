@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/courses.dart';
+import '../../data/favorites.dart';
 import '../../data/programme.dart';
+import '../frigo/courses_screen.dart';
 import 'foyer_screen.dart';
 import 'programme_widgets.dart';
 import '../../l10n/app_localizations.dart';
@@ -145,6 +148,42 @@ class ProgrammeScreen extends ConsumerWidget {
               child: Text('Compatible avec les régimes du foyer : ${diets.map((d) => kDietPlans[d]?.label ?? d).join(', ')}.', style: t.textTheme.bodyMedium),
             ),
           for (final item in plan) _PlanCard(item: item),
+          // Envoyer la journee aux courses, pour le foyer choisi : le ticket A27 note
+          // qu on pouvait regarder un menu sans jamais pouvoir l acheter.
+          if (plan.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.s8),
+            OutlinedButton.icon(
+              onPressed: () {
+                final favs = ref.read(favoritesProvider.notifier);
+                final portions = ref.read(portionsProvider.notifier);
+                final parts = foyer.effectiveCount;
+                for (final item in plan) {
+                  if (!ref.read(favoritesProvider).contains(item.recipe.slug)) {
+                    favs.toggle(item.recipe.slug);
+                  }
+                  if (parts > 1) portions.poser(item.recipe.slug, parts);
+                }
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(parts > 1
+                      ? 'Journée ajoutée aux courses, pour $parts personnes.'
+                      : 'Journée ajoutée aux courses.'),
+                  action: SnackBarAction(
+                    label: 'Voir',
+                    onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const CoursesScreen())),
+                  ),
+                ));
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.green,
+                side: const BorderSide(color: AppColors.green),
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+              ),
+              icon: const Icon(Icons.shopping_basket_outlined, size: 18),
+              label: const Text('Ajouter la journée à mes courses'),
+            ),
+          ],
           Row(children: [
             Text(L.of(context).ajouterUnGouter, style: t.textTheme.labelLarge),
             const Spacer(),
@@ -196,13 +235,15 @@ class _Macro extends StatelessWidget {
       );
 }
 
-class _PlanCard extends StatelessWidget {
+class _PlanCard extends ConsumerWidget {
   final PlanItem item;
   const _PlanCard({required this.item});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = Theme.of(context);
     final r = item.recipe;
+    final creneau = creneauDe(item.label);
+    final verrouille = ref.watch(repasVerrouillesProvider)[creneau] == r.slug;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.s16),
       child: Material(
@@ -220,9 +261,36 @@ class _PlanCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.s16),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(item.label.toUpperCase(), style: AppTypography.eyebrow(AppColors.gold)),
+                  Text(item.label.toUpperCase(), style: AppTypography.eyebrow()),
                   const SizedBox(height: 4),
                   Text(r.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, fontSize: 17)),
+                  const SizedBox(height: 6),
+                  // Remplacer UN repas sans rejouer la journee, et garder un plat qu on
+                  // vient d accepter : « Regenerer » emportait tout (ticket A27).
+                  Row(children: [
+                    _ActionRepas(
+                      icone: Icons.refresh,
+                      libelle: 'Remplacer',
+                      actif: !verrouille,
+                      onTap: () {
+                        final d = {...ref.read(decalageRepasProvider)};
+                        d[creneau] = (d[creneau] ?? 0) + 1;
+                        ref.read(decalageRepasProvider.notifier).state = d;
+                      },
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    _ActionRepas(
+                      icone: verrouille ? Icons.lock : Icons.lock_open,
+                      libelle: verrouille ? 'Gardé' : 'Garder',
+                      actif: true,
+                      enRelief: verrouille,
+                      onTap: () {
+                        final v = {...ref.read(repasVerrouillesProvider)};
+                        verrouille ? v.remove(creneau) : v[creneau] = r.slug;
+                        ref.read(repasVerrouillesProvider.notifier).state = v;
+                      },
+                    ),
+                  ]),
                   const SizedBox(height: 4),
                   Text('${r.macros?.kcal ?? 0} kcal · ${r.total} min', style: t.textTheme.labelSmall),
                 ]),
@@ -254,5 +322,34 @@ class _GrilleChoix extends StatelessWidget {
         children: [for (final f in children) f(largeur)],
       );
     });
+  }
+}
+
+/// Petite action sous un repas du programme : discrete, mais atteignable au pouce.
+class _ActionRepas extends StatelessWidget {
+  final IconData icone;
+  final String libelle;
+  final bool actif;
+  final bool enRelief;
+  final VoidCallback onTap;
+  const _ActionRepas({required this.icone, required this.libelle, required this.actif,
+      required this.onTap, this.enRelief = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final couleur = enRelief ? AppColors.green : AppColors.muted;
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: actif ? onTap : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icone, size: 15, color: actif ? couleur : AppColors.line),
+          const SizedBox(width: 4),
+          Text(libelle, style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: actif ? couleur : AppColors.line)),
+        ]),
+      ),
+    );
   }
 }

@@ -69,7 +69,7 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, 0, margin, AppSpacing.s32),
         children: [
-          Text(L.of(context).vosComptesPreferes, style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).vosComptesPreferes, style: AppTypography.eyebrow()),
           const SizedBox(height: AppSpacing.s8),
           Text(L.of(context).quelsCreateursVoulezVousRetrouver,
               style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
@@ -116,7 +116,7 @@ class _CreateursScreenState extends ConsumerState<CreateursScreen> {
           ],
 
           const SizedBox(height: AppSpacing.s32),
-          Text(L.of(context).vosPropositions, style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).vosPropositions, style: AppTypography.eyebrow()),
           const SizedBox(height: AppSpacing.s8),
           mes.when(
             loading: () => const Padding(

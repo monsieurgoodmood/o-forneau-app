@@ -55,7 +55,7 @@ class _FrigoScreenState extends ConsumerState<FrigoScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, AppSpacing.s16, margin, AppSpacing.s32),
         children: [
-          Text(L.of(context).cuisinerAvecMonFrigo2, style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).cuisinerAvecMonFrigo2, style: AppTypography.eyebrow()),
           const SizedBox(height: AppSpacing.s8),
           Text("QuL.of(context).estCeQueJai ?", style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
           const SizedBox(height: AppSpacing.s8),

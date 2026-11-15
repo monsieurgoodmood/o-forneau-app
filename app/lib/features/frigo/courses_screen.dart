@@ -58,7 +58,7 @@ class CoursesScreen extends ConsumerWidget {
           : ListView(
               padding: EdgeInsets.fromLTRB(margin, AppSpacing.s16, margin, AppSpacing.s32),
               children: [
-                Text(L.of(context).aAcheter, style: AppTypography.eyebrow(AppColors.gold)),
+                Text(L.of(context).aAcheter, style: AppTypography.eyebrow()),
                 const SizedBox(height: AppSpacing.s8),
                 Text('${lignes.length} article${lignes.length > 1 ? 's' : ''}', style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
                 const SizedBox(height: AppSpacing.s16),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -7,6 +8,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/mesure.dart';
 import '../../data/recipe.dart';
 import 'minuteur.dart';
 import '../../l10n/app_localizations.dart';
@@ -14,14 +16,14 @@ import '../../l10n/app_localizations.dart';
 /// Mode cuisine plein écran, mains libres : étape par étape, gros texte, minuteur par étape,
 /// écran anti-veille, lecture vocale des étapes et commandes vocales fr-FR
 /// (« étape suivante », « précédent », « répète », « minuteur », « pause », « terminé »).
-class CookModeScreen extends StatefulWidget {
+class CookModeScreen extends ConsumerStatefulWidget {
   final Recipe recipe;
   const CookModeScreen({super.key, required this.recipe});
   @override
-  State<CookModeScreen> createState() => _CookModeScreenState();
+  ConsumerState<CookModeScreen> createState() => _CookModeScreenState();
 }
 
-class _CookModeScreenState extends State<CookModeScreen> {
+class _CookModeScreenState extends ConsumerState<CookModeScreen> {
   final _controller = PageController();
   final _stt = SpeechToText();
   final _tts = FlutterTts();
@@ -31,6 +33,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
   /// absolue : il survit a la navigation et ne derive pas quand le telephone se
   /// verrouille (ticket A09). Logique isolee dans [MinuteurEtape], couverte par 11 tests.
   final _minuteur = MinuteurEtape();
+  late final Mesure _m;
   bool _voice = false; // pilotage vocal actif
   bool _sttReady = false;
   bool _speaking = false;
@@ -44,6 +47,8 @@ class _CookModeScreenState extends State<CookModeScreen> {
   @override
   void initState() {
     super.initState();
+    _m = ref.read(mesureProvider);
+    _m.suivre('cuisine_debut', {'slug': widget.recipe.slug, 'etapes': _steps.length});
     WakelockPlus.enable();
     _tts.setLanguage('fr-FR');
     _tts.setSpeechRate(0.48);
@@ -52,6 +57,11 @@ class _CookModeScreenState extends State<CookModeScreen> {
 
   @override
   void dispose() {
+    // Aller au bout ou abandonner en cours de route ne veut pas dire la même chose : c'est
+    // l'étape atteinte qui dit si la recette a été suivie jusqu'au plat.
+    final fini = _index >= _steps.length - 1;
+    _m.suivre(fini ? 'cuisine_terminee' : 'cuisine_abandon',
+        {'slug': widget.recipe.slug, 'etape': _index + 1, 'sur': _steps.length});
     _timer?.cancel();
     _stt.stop();
     _tts.stop();
@@ -138,6 +148,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
   }
 
   void _onPage(int i) {
+    if (i > _index) _m.suivre('cuisine_etape', {'slug': widget.recipe.slug, 'etape': i + 1, 'sur': _steps.length});
     // On NE coupe PAS le minuteur : une personne qui revoit l etape precedente
     // pendant que ca cuit ne doit pas perdre son decompte.
     setState(() => _index = i);
@@ -146,6 +157,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
 
   // ---------- Minuteur ----------
   void _startTimer(int seconds, {int? etape}) {
+    _m.suivre('minuteur_lance', {'slug': widget.recipe.slug, 'secondes': seconds, 'etape': (etape ?? _index) + 1});
     _timer?.cancel();
     setState(() => _minuteur.lancer(seconds, etape ?? _index));
     _timer = Timer.periodic(const Duration(seconds: 1), (tm) {
@@ -232,7 +244,7 @@ class _CookModeScreenState extends State<CookModeScreen> {
                   return Padding(
                     padding: const EdgeInsets.all(AppSpacing.s24),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('ÉTAPE ${i + 1} / ${_steps.length}', style: AppTypography.eyebrow(AppColors.gold)),
+                      Text('ÉTAPE ${i + 1} / ${_steps.length}', style: AppTypography.eyebrow()),
                       const SizedBox(height: AppSpacing.s24),
                       Expanded(child: SingleChildScrollView(child: Text(step.text, style: AppTypography.cookStep(AppColors.ink).copyWith(fontSize: 26, height: 1.5)))),
                       if (step.seconds != null && step.seconds! > 0)

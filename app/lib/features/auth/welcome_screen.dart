@@ -30,7 +30,7 @@ class WelcomeScreen extends ConsumerWidget {
                   style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, letterSpacing: 3, fontSize: 26)),
               const SizedBox(height: 6),
               Text(L.of(context).parMaisonForneau1974,
-                  textAlign: TextAlign.center, style: AppTypography.eyebrow(AppColors.gold).copyWith(letterSpacing: 2)),
+                  textAlign: TextAlign.center, style: AppTypography.eyebrow().copyWith(letterSpacing: 2)),
               const SizedBox(height: AppSpacing.s32),
               Text('Les recettes virales,\nréunies et adaptées.',
                   textAlign: TextAlign.center,

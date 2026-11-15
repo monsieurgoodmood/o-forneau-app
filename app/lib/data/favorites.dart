@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth.dart';
+import 'mesure.dart';
 import 'supabase_client.dart';
 
 /// Favoris : persistés localement (hors-ligne), synchronisés dans user_profiles.app_state.favs
@@ -29,8 +30,15 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> toggle(String slug) async {
     final s = Set<String>.from(state);
-    s.contains(slug) ? s.remove(slug) : s.add(slug);
+    final retire = s.contains(slug);
+    retire ? s.remove(slug) : s.add(slug);
     state = s;
+    // Mesuré ICI, pas sur le bouton : les favoris se posent depuis la liste, depuis la
+    // fiche et depuis le programme. Instrumenter les trois boutons garantit d'en oublier
+    // un au prochain écran ajouté ; instrumenter l'action les couvre tous.
+    _ref.read(mesureProvider).suivre('clic', {
+      'action': 'favori', 'valeur': retire ? 'retire' : 'ajoute', 'recette': slug, 'total': s.length,
+    });
     await _prefs.setString(_key, jsonEncode(s.toList()));
     _pushToCloud();
   }

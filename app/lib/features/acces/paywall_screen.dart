@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/acces.dart';
+import '../../data/mesure.dart';
 import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
 import '../auth/exiger_compte.dart';
@@ -48,14 +49,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Future<void> _essai() async {
     setState(() { _busy = true; _message = null; });
     final err = await ref.read(accesActionsProvider).lancerEssai();
+    ref.read(mesureProvider).suivre('essai_lance', {'reussi': err == null, 'depuis': widget.fonction});
     if (!mounted) return;
     setState(() { _busy = false; _message = err; });
     if (err == null && mounted) Navigator.pop(context, true);
   }
 
   Future<void> _acheter(rc.Package p) async {
+    // L'intention compte autant que l'achat : c'est l'écart entre les deux qui dit si le
+    // parcours de paiement coince.
+    ref.read(mesureProvider).suivre('abonnement_tente', {'forfait': p.identifier, 'depuis': widget.fonction});
     setState(() { _busy = true; _message = null; });
     final err = await ref.read(accesActionsProvider).acheter(p);
+    ref.read(mesureProvider).suivre('abonnement_resultat', {'forfait': p.identifier, 'reussi': err == null});
     if (!mounted) return;
     final actif = ref.read(estPremiumProvider);
     setState(() { _busy = false; _message = err; });
@@ -82,7 +88,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, 0, margin, AppSpacing.s32),
         children: [
-          Text(L.of(context).oForneauPremium, style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).oForneauPremium, style: AppTypography.eyebrow()),
           const SizedBox(height: AppSpacing.s8),
           Text(
             widget.fonction.isEmpty
@@ -102,7 +108,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               border: Border.all(color: AppColors.green.withValues(alpha: 0.35)),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(L.of(context).vousAvezCommandeChezForneau, style: AppTypography.eyebrow(AppColors.gold)),
+              Text(L.of(context).vousAvezCommandeChezForneau, style: AppTypography.eyebrow()),
               const SizedBox(height: 4),
               Text(L.of(context).jusquA12MoisOfferts2, style: t.textTheme.headlineMedium?.copyWith(color: AppColors.greenDeep)),
               const SizedBox(height: 4),
@@ -142,7 +148,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ],
 
           // 3) Abonnement
-          Text(L.of(context).sAbonner, style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).sAbonner, style: AppTypography.eyebrow()),
           const SizedBox(height: AppSpacing.s8),
           if (!connecte)
             _carteInfo(t, L.of(context).creezUnComptePourVousAbonner,

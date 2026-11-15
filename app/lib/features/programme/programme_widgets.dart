@@ -11,7 +11,7 @@ class Eyebrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.s8),
-        child: Text(text.toUpperCase(), style: AppTypography.eyebrow(AppColors.gold)),
+        child: Text(text.toUpperCase(), style: AppTypography.eyebrow()),
       );
 }
 

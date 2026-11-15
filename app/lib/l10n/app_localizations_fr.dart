@@ -258,7 +258,7 @@ class LFr extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Compte créé. Vérifiez vos e-mails si une confirmation est demandée, puis connectez-vous.';
+      'Compte créé. Un e-mail vient de partir : cliquez sur son lien pour confirmer votre adresse, puis connectez-vous.';
 
   @override
   String get invalidLogin => 'Invalid login';
@@ -722,4 +722,83 @@ class LFr extends L {
 
   @override
   String get unGourmand => 'Un gourmand';
+
+  @override
+  String get photoPublique =>
+      'Votre photo et votre prénom seront visibles de toutes les personnes qui ouvrent cette recette. Vous pourrez la retirer à tout moment.';
+
+  @override
+  String get telechargerMesDonnees => 'Télécharger mes données';
+
+  @override
+  String get exportPrepare =>
+      'Vos données sont prêtes. Elles s’ouvrent dans votre navigateur ; enregistrez le fichier pour le garder.';
+
+  @override
+  String get exportEchoue =>
+      'Impossible de préparer l’export pour le moment. Réessayez, ou écrivez à contact@forneau.com.';
+
+  @override
+  String get mesureTitre => 'Nous aider à améliorer l’app ?';
+
+  @override
+  String get mesureTexte =>
+      'Nous aimerions savoir quels écrans servent et où les gens bloquent, pour améliorer l’application. Rien qui vous identifie n’est transmis — ni votre e-mail, ni votre prénom, ni ce que vous écrivez. Refuser ne vous retire aucune fonction.';
+
+  @override
+  String get mesureAccepter => 'Accepter';
+
+  @override
+  String get mesureRefuser => 'Refuser';
+
+  @override
+  String get mesureRevenir => 'Mesure d’usage : revenir sur mon choix';
+
+  @override
+  String get mesureEnregistre =>
+      'C’est noté. Vous pourrez en changer depuis l’écran Compte.';
+
+  @override
+  String get notifTitre => 'Être prévenu quand c’est utile ?';
+
+  @override
+  String get notifTexte =>
+      'Une idée pour ce soir, une recette qui va avec votre frigo ou vos favoris, les nouveautés, la fin de votre essai. Une par jour au plus, jamais la nuit, et vous choisissez les sujets. Refuser ne retire aucune fonction.';
+
+  @override
+  String get notifAccepter => 'Activer';
+
+  @override
+  String get notifRefuser => 'Pas maintenant';
+
+  @override
+  String get notifEnregistre => 'C’est noté.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'Le téléphone a refusé les notifications. Vous pouvez les autoriser dans ses réglages, puis réactiver ici.';
+
+  @override
+  String get notifSection => 'Notifications';
+
+  @override
+  String get notifSectionTexte =>
+      'Une par jour au plus, jamais entre 21 h et 9 h.';
+
+  @override
+  String get notifCatSoir => 'Une idée pour ce soir et le week-end';
+
+  @override
+  String get notifCatPerso =>
+      'D’après mon frigo, mes favoris, ce que je cuisine';
+
+  @override
+  String get notifCatNouveautes => 'Nouvelles recettes';
+
+  @override
+  String get notifCatAcces => 'Mon accès et mon essai';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Adresse pas encore confirmée : ouvrez l’e-mail reçu et cliquez sur son lien, puis réessayez.';
 }

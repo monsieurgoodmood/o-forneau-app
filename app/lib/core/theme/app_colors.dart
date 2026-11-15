@@ -17,7 +17,16 @@ class AppColors {
   static const greenSoft = Color(0xFFE3EDDE); // conteneurs doux (n° d'étape, astuce)
 
   // Or
-  static const gold = Color(0xFFA9823E); // eyebrows, icônes
+  static const gold = Color(0xFFA9823E); // icônes, filets, dégradés — SURFACES
+  /// L'or de la charte, assombri juste assez pour être LU.
+  ///
+  /// `gold` donne 2,93:1 sur la barre crème et sur le vert pâle — sous le seuil WCAG AA
+  /// de 4,5:1 — et il porte les eyebrows de tous les écrans. On ne le change pas : il
+  /// peint aussi les icônes, les filets et les dégradés, et l'identité de la marque en
+  /// dépend. `goldText` est le même or (teinte 38° conservée) descendu jusqu'à 4,51:1
+  /// sur les cinq fonds de l'app. Les icônes gardent `gold` : elles relèvent du seuil
+  /// 3:1 des éléments non textuels, qu'elles respectent déjà.
+  static const goldText = Color(0xFF836530);
   static const goldDeep = Color(0xFFB98E46);
 
   // Encre / neutres

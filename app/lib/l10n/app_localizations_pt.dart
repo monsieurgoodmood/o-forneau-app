@@ -258,7 +258,7 @@ class LPt extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Conta criada. Verifique seus e-mails caso seja solicitada uma confirmação e, em seguida, faça login.';
+      'Conta criada. Segue um e-mail: clique na ligação para confirmar o seu endereço e depois inicie sessão.';
 
   @override
   String get invalidLogin => 'Login inválido';
@@ -723,4 +723,84 @@ class LPt extends L {
 
   @override
   String get unGourmand => 'Um gourmet';
+
+  @override
+  String get photoPublique =>
+      'Sua foto e seu primeiro nome ficarão visíveis para todos que abrirem esta receita. Você pode removê-los a qualquer momento.';
+
+  @override
+  String get telechargerMesDonnees => 'Baixar meus dados';
+
+  @override
+  String get exportPrepare =>
+      'Seus dados estão prontos. Eles serão abertos no seu navegador; salve o arquivo para guardá-lo.';
+
+  @override
+  String get exportEchoue =>
+      'Não foi possível preparar a exportação neste momento. Tente novamente ou entre em contato pelo e-mail contact@forneau.com.';
+
+  @override
+  String get mesureTitre => 'Pode nos ajudar a melhorar o aplicativo?';
+
+  @override
+  String get mesureTexte =>
+      'Gostaríamos de saber quais telas as pessoas usam e onde encontram dificuldades, para que possamos aprimorar o aplicativo. Nenhuma informação que o identifique é transmitida — nem seu e-mail, nem seu nome, nem o que você digita. Recusar não remove nenhuma funcionalidade.';
+
+  @override
+  String get mesureAccepter => 'Aceitar';
+
+  @override
+  String get mesureRefuser => 'Recusar';
+
+  @override
+  String get mesureRevenir =>
+      'Medida de utilização: reconsiderar minha escolha';
+
+  @override
+  String get mesureEnregistre =>
+      'Anotado. Você pode alterar isso na tela da sua conta.';
+
+  @override
+  String get notifTitre => 'Ser avisado quando for útil?';
+
+  @override
+  String get notifTexte =>
+      'Uma ideia para esta noite, uma receita a condizer com o seu frigorífico ou favoritos, as novidades, o fim do seu período de teste. No máximo uma por dia, nunca à noite, e é você que escolhe os temas. Recusar não retira nenhuma função.';
+
+  @override
+  String get notifAccepter => 'Ativar';
+
+  @override
+  String get notifRefuser => 'Agora não';
+
+  @override
+  String get notifEnregistre => 'Anotado.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'O telemóvel recusou as notificações. Pode autorizá-las nas definições e reativá-las aqui.';
+
+  @override
+  String get notifSection => 'Notificações';
+
+  @override
+  String get notifSectionTexte =>
+      'No máximo uma por dia, nunca entre as 21 h e as 9 h.';
+
+  @override
+  String get notifCatSoir => 'Uma ideia para esta noite e o fim de semana';
+
+  @override
+  String get notifCatPerso =>
+      'Com base no meu frigorífico, favoritos e no que cozinho';
+
+  @override
+  String get notifCatNouveautes => 'Novas receitas';
+
+  @override
+  String get notifCatAcces => 'O meu acesso e período de teste';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Endereço ainda não confirmado: abra o e-mail recebido, clique na ligação e tente novamente.';
 }

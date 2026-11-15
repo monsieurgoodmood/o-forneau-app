@@ -257,7 +257,7 @@ class LEs extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Cuenta creada. Revisa tu correo electrónico si se te solicita una confirmación y luego inicia sesión.';
+      'Cuenta creada. Le llega un correo: haga clic en su enlace para confirmar su dirección y luego inicie sesión.';
 
   @override
   String get invalidLogin => 'Inicio de sesión no válido';
@@ -724,4 +724,82 @@ class LEs extends L {
 
   @override
   String get unGourmand => 'Un sibarita';
+
+  @override
+  String get photoPublique =>
+      'Tu foto y tu nombre serán visibles para todos los que abran esta receta. Puedes eliminarlos cuando quieras.';
+
+  @override
+  String get telechargerMesDonnees => 'Descargar mis datos';
+
+  @override
+  String get exportPrepare =>
+      'Sus datos están listos. Se abrirán en su navegador; guarde el archivo para conservarlo.';
+
+  @override
+  String get exportEchoue =>
+      'No es posible preparar la exportación en este momento. Inténtelo de nuevo o escriba a contact@forneau.com.';
+
+  @override
+  String get mesureTitre => '¿Nos ayudas a mejorar la aplicación?';
+
+  @override
+  String get mesureTexte =>
+      'Nos gustaría saber qué pantallas usan los usuarios y dónde tienen dificultades para poder mejorar la aplicación. No se transmite ningún dato que te identifique: ni tu correo electrónico, ni tu nombre, ni lo que escribes. Rechazar esta solicitud no desactiva ninguna función.';
+
+  @override
+  String get mesureAccepter => 'Aceptar';
+
+  @override
+  String get mesureRefuser => 'Rechazar';
+
+  @override
+  String get mesureRevenir => 'Medida de uso: reconsiderar mi elección';
+
+  @override
+  String get mesureEnregistre =>
+      'Anotado. Puedes cambiarlo desde la pantalla de Cuenta.';
+
+  @override
+  String get notifTitre => '¿Avisarle cuando sea útil?';
+
+  @override
+  String get notifTexte =>
+      'Una idea para esta noche, una receta acorde con su nevera o sus favoritos, las novedades, el fin de su prueba. Como mucho una al día, nunca de noche, y usted elige los temas. Rechazar no quita ninguna función.';
+
+  @override
+  String get notifAccepter => 'Activar';
+
+  @override
+  String get notifRefuser => 'Ahora no';
+
+  @override
+  String get notifEnregistre => 'Anotado.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'El teléfono rechazó las notificaciones. Puede permitirlas en sus ajustes y volver a activarlas aquí.';
+
+  @override
+  String get notifSection => 'Notificaciones';
+
+  @override
+  String get notifSectionTexte =>
+      'Como mucho una al día, nunca entre las 21 h y las 9 h.';
+
+  @override
+  String get notifCatSoir => 'Una idea para esta noche y el fin de semana';
+
+  @override
+  String get notifCatPerso => 'Según mi nevera, mis favoritos y lo que cocino';
+
+  @override
+  String get notifCatNouveautes => 'Nuevas recetas';
+
+  @override
+  String get notifCatAcces => 'Mi acceso y mi prueba';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Dirección aún no confirmada: abra el correo recibido, haga clic en su enlace y vuelva a intentarlo.';
 }

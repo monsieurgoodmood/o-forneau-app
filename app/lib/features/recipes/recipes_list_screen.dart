@@ -54,7 +54,7 @@ class RecipesListScreen extends ConsumerWidget {
                         children: [
                           Text(L.of(context).lesRecettes, style: Theme.of(context).textTheme.displayLarge?.copyWith(color: AppColors.greenDeep)),
                           const Spacer(),
-                          Text('${filtered.length}', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.gold)),
+                          Text('${filtered.length}', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.goldText)),
                           const SizedBox(width: 4),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 2),
@@ -145,7 +145,7 @@ class _Wordmark extends StatelessWidget {
                   style: AppTypography.textTheme(AppColors.greenDeep, AppColors.muted)
                       .titleLarge
                       ?.copyWith(fontSize: 24, letterSpacing: 2.5, color: AppColors.greenDeep)),
-              Text(L.of(context).parMaisonForneau1974, style: AppTypography.eyebrow(AppColors.gold).copyWith(fontSize: 10, letterSpacing: 1.6)),
+              Text(L.of(context).parMaisonForneau1974, style: AppTypography.eyebrow().copyWith(fontSize: 10, letterSpacing: 1.6)),
             ],
           ),
           const Spacer(),
@@ -233,7 +233,7 @@ class _FiltersSheet extends ConsumerWidget {
     Widget section(String title, List<Widget> chips) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTypography.eyebrow(AppColors.gold)),
+            Text(title, style: AppTypography.eyebrow()),
             const SizedBox(height: AppSpacing.s8),
             Wrap(spacing: AppSpacing.s8, runSpacing: AppSpacing.s8, children: chips),
             const SizedBox(height: AppSpacing.s24),
@@ -374,7 +374,7 @@ class RecipeCard extends ConsumerWidget {
                       Row(children: [
                         const Icon(Icons.eco, size: 14, color: AppColors.gold),
                         const SizedBox(width: 5),
-                        Text(diet.short.toUpperCase(), style: AppTypography.eyebrow(AppColors.gold)),
+                        Text(diet.short.toUpperCase(), style: AppTypography.eyebrow()),
                       ]),
                     const SizedBox(height: 6),
                     Text(recipe.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),

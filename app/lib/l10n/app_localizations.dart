@@ -560,7 +560,7 @@ abstract class L {
   /// No description provided for @compteCreeVerifiezVosEMails.
   ///
   /// In fr, this message translates to:
-  /// **'Compte créé. Vérifiez vos e-mails si une confirmation est demandée, puis connectez-vous.'**
+  /// **'Compte créé. Un e-mail vient de partir : cliquez sur son lien pour confirmer votre adresse, puis connectez-vous.'**
   String get compteCreeVerifiezVosEMails;
 
   /// No description provided for @invalidLogin.
@@ -1408,6 +1408,144 @@ abstract class L {
   /// In fr, this message translates to:
   /// **'Un gourmand'**
   String get unGourmand;
+
+  /// No description provided for @photoPublique.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre photo et votre prénom seront visibles de toutes les personnes qui ouvrent cette recette. Vous pourrez la retirer à tout moment.'**
+  String get photoPublique;
+
+  /// No description provided for @telechargerMesDonnees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger mes données'**
+  String get telechargerMesDonnees;
+
+  /// No description provided for @exportPrepare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos données sont prêtes. Elles s’ouvrent dans votre navigateur ; enregistrez le fichier pour le garder.'**
+  String get exportPrepare;
+
+  /// No description provided for @exportEchoue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de préparer l’export pour le moment. Réessayez, ou écrivez à contact@forneau.com.'**
+  String get exportEchoue;
+
+  /// No description provided for @mesureTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous aider à améliorer l’app ?'**
+  String get mesureTitre;
+
+  /// No description provided for @mesureTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous aimerions savoir quels écrans servent et où les gens bloquent, pour améliorer l’application. Rien qui vous identifie n’est transmis — ni votre e-mail, ni votre prénom, ni ce que vous écrivez. Refuser ne vous retire aucune fonction.'**
+  String get mesureTexte;
+
+  /// No description provided for @mesureAccepter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get mesureAccepter;
+
+  /// No description provided for @mesureRefuser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get mesureRefuser;
+
+  /// No description provided for @mesureRevenir.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mesure d’usage : revenir sur mon choix'**
+  String get mesureRevenir;
+
+  /// No description provided for @mesureEnregistre.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est noté. Vous pourrez en changer depuis l’écran Compte.'**
+  String get mesureEnregistre;
+
+  /// No description provided for @notifTitre.
+  ///
+  /// In fr, this message translates to:
+  /// **'Être prévenu quand c’est utile ?'**
+  String get notifTitre;
+
+  /// No description provided for @notifTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une idée pour ce soir, une recette qui va avec votre frigo ou vos favoris, les nouveautés, la fin de votre essai. Une par jour au plus, jamais la nuit, et vous choisissez les sujets. Refuser ne retire aucune fonction.'**
+  String get notifTexte;
+
+  /// No description provided for @notifAccepter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer'**
+  String get notifAccepter;
+
+  /// No description provided for @notifRefuser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas maintenant'**
+  String get notifRefuser;
+
+  /// No description provided for @notifEnregistre.
+  ///
+  /// In fr, this message translates to:
+  /// **'C’est noté.'**
+  String get notifEnregistre;
+
+  /// No description provided for @notifRefuseeSysteme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le téléphone a refusé les notifications. Vous pouvez les autoriser dans ses réglages, puis réactiver ici.'**
+  String get notifRefuseeSysteme;
+
+  /// No description provided for @notifSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notifSection;
+
+  /// No description provided for @notifSectionTexte.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une par jour au plus, jamais entre 21 h et 9 h.'**
+  String get notifSectionTexte;
+
+  /// No description provided for @notifCatSoir.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une idée pour ce soir et le week-end'**
+  String get notifCatSoir;
+
+  /// No description provided for @notifCatPerso.
+  ///
+  /// In fr, this message translates to:
+  /// **'D’après mon frigo, mes favoris, ce que je cuisine'**
+  String get notifCatPerso;
+
+  /// No description provided for @notifCatNouveautes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelles recettes'**
+  String get notifCatNouveautes;
+
+  /// No description provided for @notifCatAcces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon accès et mon essai'**
+  String get notifCatAcces;
+
+  /// No description provided for @adressePasEncoreConfirmee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse pas encore confirmée : ouvrez l’e-mail reçu et cliquez sur son lien, puis réessayez.'**
+  String get adressePasEncoreConfirmee;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

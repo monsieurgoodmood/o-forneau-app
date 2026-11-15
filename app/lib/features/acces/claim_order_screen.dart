@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/acces.dart';
+import '../../data/mesure.dart';
 import '../../data/auth.dart';
 import '../auth/auth_screen.dart';
 import '../../l10n/app_localizations.dart';
@@ -45,9 +46,11 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
 
   Future<void> _valider() async {
     setState(() { _busy = true; _erreur = null; });
+    // Aucun numéro de commande ni e-mail ne part : seulement si la réclamation a abouti.
     final res = await ref.read(accesActionsProvider).reclamerCommande(
           numero: _numero.text.trim(), email: _email.text.trim(),
         );
+    ref.read(mesureProvider).suivre('commande_reclamee', {'reussi': res.ok, 'mois': res.ok ? res.mois : 0});
     if (!mounted) return;
     if (res.ok) {
       final a = ref.read(accesProvider).asData?.value;
@@ -115,7 +118,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
               child: Text(L.of(context).creerMonCompte),
             ),
           ] else ...[
-            Text(L.of(context).jusquA12MoisOfferts, style: AppTypography.eyebrow(AppColors.gold)),
+            Text(L.of(context).jusquA12MoisOfferts, style: AppTypography.eyebrow()),
             const SizedBox(height: AppSpacing.s8),
             Text('Vous avez commandé\nchez Forneau ?', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: AppSpacing.s16),
@@ -126,7 +129,7 @@ class _ClaimOrderScreenState extends ConsumerState<ClaimOrderScreen> {
               padding: const EdgeInsets.all(AppSpacing.s16),
               decoration: BoxDecoration(color: AppColors.greenSoft, borderRadius: BorderRadius.circular(AppRadius.r16)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(L.of(context).ceQueVousObtenez, style: AppTypography.eyebrow(AppColors.gold)),
+                Text(L.of(context).ceQueVousObtenez, style: AppTypography.eyebrow()),
                 const SizedBox(height: AppSpacing.s8),
                 for (final (seuil, mois) in kPaliers)
                   Padding(

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/mesure.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/acces/claim_order_screen.dart';
 import '../../features/acces/paywall_screen.dart';
@@ -27,6 +28,9 @@ const _vitrine = bool.fromEnvironment('VITRINE');
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
+    // Chaque écran est mesuré depuis ici, et non écran par écran : un nouvel écran est
+    // donc suivi d'office, sans qu'on ait à penser à l'instrumenter.
+    observers: [ObservateurEcrans(ref.read(mesureProvider))],
     routes: [
       GoRoute(path: '/', builder: (context, state) => const AppGate()),
       GoRoute(

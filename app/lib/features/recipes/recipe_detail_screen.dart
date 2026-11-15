@@ -9,6 +9,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/catalog.dart';
 import '../../data/courses.dart';
 import '../../data/favorites.dart';
+import '../../data/mesure.dart';
 import '../../data/recipe.dart';
 import '../../data/recipes_repository.dart';
 import 'cook_mode_screen.dart';
@@ -37,6 +38,16 @@ String _libelleTemps(Recipe r) {
 
 
 class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Le routeur ne voit que le gabarit « /recipe/:slug » : c'est ici que l'on sait QUELLE
+    // recette est ouverte — pour la mesure et pour le profil des notifications.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(mesureProvider).suivre('recette_ouverte', {'recette': widget.slug});
+    });
+  }
+
   int? _servings;
 
   @override
@@ -115,7 +126,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 const SizedBox(height: AppSpacing.s24),
 
                 // Bloc ustensile Forneau
-                _UstensileCard(product: prod),
+                _UstensileCard(product: prod, slug: recipe.slug),
                 const SizedBox(height: AppSpacing.s24),
 
                 // Portions
@@ -241,16 +252,17 @@ class _DietPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: AppColors.line),
       ),
-      child: Text(label, style: AppTypography.eyebrow(AppColors.gold)),
+      child: Text(label, style: AppTypography.eyebrow()),
     );
   }
 }
 
-class _UstensileCard extends StatelessWidget {
+class _UstensileCard extends ConsumerWidget {
   final ProductDef product;
-  const _UstensileCard({required this.product});
+  final String slug;
+  const _UstensileCard({required this.product, required this.slug});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s16),
@@ -273,7 +285,7 @@ class _UstensileCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(L.of(context).ustensileForneau, style: AppTypography.eyebrow(AppColors.gold)),
+                Text(L.of(context).ustensileForneau, style: AppTypography.eyebrow()),
                 const SizedBox(height: 4),
                 Text(product.name, style: t.textTheme.titleLarge?.copyWith(color: AppColors.greenDeep, fontSize: 19)),
                 Text(product.tagline, style: t.textTheme.bodyMedium),
@@ -282,7 +294,14 @@ class _UstensileCard extends StatelessWidget {
           ),
           if (product.have)
             TextButton(
-              onPressed: () => launchUrl(Uri.parse(product.url), mode: LaunchMode.externalApplication),
+              onPressed: () {
+                // Le départ vers la boutique relie l'usage de l'app au chiffre d'affaires.
+                // Sans la recette d'où part le clic, « a regardé la sauteuse » ne dit pas
+                // pourquoi — et c'est le pourquoi qui sert à décider.
+                ref.read(mesureProvider).suivre('clic_produit',
+                    {'produit': product.handle, 'recette': slug, 'ecran': 'fiche_recette'});
+                launchUrl(Uri.parse(product.url), mode: LaunchMode.externalApplication);
+              },
               child: Text(L.of(context).voirLeProduit, style: t.textTheme.labelMedium?.copyWith(color: AppColors.green)),
             ),
         ],
@@ -430,7 +449,7 @@ class _TitaneTip extends StatelessWidget {
           Row(children: [
             const Icon(Icons.auto_awesome, size: 17, color: AppColors.gold),
             const SizedBox(width: AppSpacing.s8),
-            Expanded(child: Text('LE GESTE TITANE — ${product.shortName.toUpperCase()}', style: AppTypography.eyebrow(AppColors.gold))),
+            Expanded(child: Text('LE GESTE TITANE — ${product.shortName.toUpperCase()}', style: AppTypography.eyebrow())),
           ]),
           const SizedBox(height: AppSpacing.s8),
           Text(text, style: t.textTheme.bodyLarge?.copyWith(color: AppColors.greenDeep)),

@@ -9,8 +9,12 @@ import '../../data/auth.dart';
 import '../createurs/createurs_screen.dart';
 import '../acces/claim_order_screen.dart';
 import '../acces/paywall_screen.dart';
-import 'auth_screen.dart';
+import '../../data/mesure.dart';
+import '../../data/supabase_client.dart';
+import '../mesure/consentement_mesure.dart';
+import '../notifications/consentement_notifications.dart';
 import '../../l10n/app_localizations.dart';
+import 'auth_screen.dart';
 
 /// Bloc « votre accès » : état courant et action adaptée.
 class _CarteAcces extends ConsumerWidget {
@@ -51,7 +55,7 @@ class _CarteAcces extends ConsumerWidget {
         border: Border.all(color: a.actif ? AppColors.green.withValues(alpha: 0.3) : AppColors.line),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(L.of(context).votreAcces, style: AppTypography.eyebrow(AppColors.gold)),
+        Text(L.of(context).votreAcces, style: AppTypography.eyebrow()),
         const SizedBox(height: 4),
         Text(titre, style: t.textTheme.headlineSmall?.copyWith(color: AppColors.greenDeep)),
         const SizedBox(height: 4),
@@ -114,7 +118,7 @@ class AccountScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.s8),
             Text(L.of(context).creezUnComptePourRetrouverVos, style: t.textTheme.bodyLarge?.copyWith(color: AppColors.muted)),
             const SizedBox(height: AppSpacing.s24),
-            FilledButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => AuthScreen(mode: AuthMode.signup))), child: Text(L.of(context).creerMonCompte)),
+            FilledButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.signup))), child: Text(L.of(context).creerMonCompte)),
             const SizedBox(height: AppSpacing.s8),
             OutlinedButton(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AuthScreen(mode: AuthMode.login))),
@@ -122,7 +126,7 @@ class AccountScreen extends ConsumerWidget {
               child: Text(L.of(context).jAiDejaUnCompte),
             ),
           ] else ...[
-            Text(L.of(context).votreProfil, style: AppTypography.eyebrow(AppColors.gold)),
+            Text(L.of(context).votreProfil, style: AppTypography.eyebrow()),
             const SizedBox(height: AppSpacing.s8),
             Text(prenom != null && prenom.isNotEmpty ? 'Bonjour $prenom' : 'Bonjour', style: t.textTheme.displaySmall?.copyWith(color: AppColors.greenDeep)),
             const SizedBox(height: 4),
@@ -153,16 +157,33 @@ class AccountScreen extends ConsumerWidget {
               label: Text(L.of(context).meDeconnecter),
             ),
             const SizedBox(height: AppSpacing.s8),
+            // Droit d'accès et droit à la portabilité (RGPD art. 15 et 20). Le registre des
+            // traitements relevait qu'ils étaient servis à la main, par e-mail : un droit qui
+            // dépend d'une boîte de réception est un droit lent. Ici, c'est immédiat.
+            const _ExportDonnees(),
             TextButton(
               onPressed: () => launchUrl(Uri.parse('https://app.forneau.com/legal/suppression.html'), mode: LaunchMode.externalApplication),
               child: Text(L.of(context).supprimerMonCompteEtMesDonnees, style: t.textTheme.labelLarge?.copyWith(color: AppColors.danger)),
             ),
           ],
           const SizedBox(height: AppSpacing.s24),
+          // Réglable avec ou sans compte : l'abonnement est celui de l'appareil.
+          const ReglagesNotifications(),
+          const SizedBox(height: AppSpacing.s24),
           const Divider(color: AppColors.line),
           TextButton(
             onPressed: () => launchUrl(Uri.parse('https://app.forneau.com/legal/privacy.html'), mode: LaunchMode.externalApplication),
             child: Text(L.of(context).politiqueDeConfidentialite, style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
+          ),
+          // Revenir sur son choix doit être aussi simple que de l'avoir fait. Un
+          // consentement qu'on ne peut pas retirer n'en est pas un.
+          TextButton(
+            onPressed: () async {
+              await ref.read(mesureProvider).oublierLeChoix();
+              if (context.mounted) await ConsentementMesure.demanderSiBesoin(context, ref);
+            },
+            child: Text(L.of(context).mesureRevenir,
+                style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
           ),
           TextButton(
             onPressed: () => launchUrl(Uri.parse('https://forneau.com'), mode: LaunchMode.externalApplication),
@@ -170,6 +191,64 @@ class AccountScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Bouton « Télécharger mes données » — droit d'accès et portabilité.
+///
+/// L'export est produit par l'Edge Function `export-donnees`, qui interroge la base **au nom
+/// de l'utilisateur** et non avec la clé de service : les politiques RLS restent la seule
+/// autorité sur ce qui sort, et une faute de code ne peut pas exposer les données d'un autre.
+///
+/// Le fichier s'ouvre dans le navigateur plutôt que d'être enregistré par l'app : cela évite
+/// de demander une permission de stockage pour un geste rare, et la personne garde la main sur
+/// l'endroit où le fichier finit.
+class _ExportDonnees extends ConsumerStatefulWidget {
+  const _ExportDonnees();
+  @override
+  ConsumerState<_ExportDonnees> createState() => _ExportDonneesState();
+}
+
+class _ExportDonneesState extends ConsumerState<_ExportDonnees> {
+  bool _enCours = false;
+
+  Future<void> _exporter() async {
+    setState(() => _enCours = true);
+    try {
+      final session = supabase.auth.currentSession;
+      if (session == null) throw StateError('aucune session');
+      // On appelle la fonction pour vérifier qu'elle répond et que la session est acceptée,
+      // avant d'envoyer la personne vers son navigateur sur une erreur.
+      final rep = await supabase.functions.invoke('export-donnees');
+      if (rep.data == null) throw StateError('réponse vide');
+      final uri = Uri.parse('${SupabaseConfig.url}/functions/v1/export-donnees'
+          '?token=${session.accessToken}');
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(L.of(context).exportPrepare)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(L.of(context).exportEchoue)));
+      }
+    } finally {
+      if (mounted) setState(() => _enCours = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return TextButton.icon(
+      onPressed: _enCours ? null : _exporter,
+      icon: _enCours
+          ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.download_outlined, size: 18, color: AppColors.muted),
+      label: Text(L.of(context).telechargerMesDonnees,
+          style: t.textTheme.labelLarge?.copyWith(color: AppColors.muted)),
     );
   }
 }

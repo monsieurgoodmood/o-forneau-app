@@ -14,29 +14,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:o_forneau/core/theme/app_theme.dart';
+import 'package:o_forneau/l10n/app_localizations.dart';
 import 'package:o_forneau/data/auth.dart';
 import 'package:o_forneau/data/supabase_client.dart';
 import 'package:o_forneau/features/acces/claim_order_screen.dart';
 import 'package:o_forneau/features/acces/paywall_screen.dart';
+import 'package:o_forneau/features/auth/account_screen.dart';
 import 'package:o_forneau/features/auth/exiger_compte.dart';
 import 'package:o_forneau/features/createurs/createurs_screen.dart';
+import 'package:o_forneau/features/mesure/consentement_mesure.dart';
 import 'package:o_forneau/features/programme/foyer_screen.dart';
 import 'package:o_forneau/features/programme/programme_screen.dart';
 
 /// iPhone SE, iPhone 14, et la largeur CSS de l'audit après zoom.
 const _largeurs = <(double, String)>[(320, 'iPhone SE'), (390, 'iPhone 14'), (454, 'audit')];
 
-const _polices = ['Inter_regular', 'Inter_500', 'Inter_600', 'Inter_700',
-                  'PlayfairDisplay_700', 'MaterialIcons'];
+/// Les vraies polices de l'app, chargées sous leurs vraies familles.
+///
+/// Elles étaient lues depuis `test/fonts/` sous les noms internes que `google_fonts`
+/// fabriquait à l'exécution (`Inter_600`). Les polices sont maintenant embarquées dans
+/// `assets/fonts/` sous les familles « Inter » et « Playfair Display » : le test lit les
+/// mêmes fichiers que l'app et mesure donc les mêmes largeurs de texte. Charger une
+/// famille que l'app n'utilise pas rendrait ce test aveugle aux débordements, puisqu'il
+/// mesurerait une police de secours plus étroite que celle qui s'affiche.
+const _polices = <String, List<String>>{
+  'Inter': [
+    'assets/fonts/Inter-Regular.ttf',
+    'assets/fonts/Inter-Medium.ttf',
+    'assets/fonts/Inter-SemiBold.ttf',
+    'assets/fonts/Inter-Bold.ttf',
+  ],
+  'Playfair Display': ['assets/fonts/PlayfairDisplay-Bold.ttf'],
+  'MaterialIcons': ['test/fonts/MaterialIcons.ttf'],
+};
 
 Future<void> _chargerPolices() async {
-  for (final nom in _polices) {
-    final octets = File('test/fonts/$nom.ttf').readAsBytesSync();
-    await (FontLoader(nom)..addFont(Future.value(ByteData.sublistView(octets)))).load();
+  for (final entree in _polices.entries) {
+    final chargeur = FontLoader(entree.key);
+    for (final chemin in entree.value) {
+      final octets = File(chemin).readAsBytesSync();
+      chargeur.addFont(Future.value(ByteData.sublistView(octets)));
+    }
+    await chargeur.load();
   }
 }
 
@@ -49,23 +71,34 @@ Future<List<String>> _debordements(WidgetTester tester, Widget ecran, double lar
   final prefs = await SharedPreferences.getInstance();
   await tester.pumpWidget(ProviderScope(
     overrides: [prefsProvider.overrideWithValue(prefs)],
-    child: MaterialApp(theme: AppTheme.light, debugShowCheckedModeBanner: false, home: ecran),
+    // Les traductions doivent être déclarées comme dans l'app : sans elles,
+    // `L.of(context)` renvoie null, chaque écran qui lit un libellé lève une erreur à la
+    // construction, et le test mesure la mise en page d'un écran d'erreur rouge au lieu de
+    // l'écran réel. Il passait alors sans rien vérifier.
+    child: MaterialApp(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
+      home: ecran,
+    ),
   ));
 
   final fautes = <String>[];
   for (var i = 0; i < 6; i++) {
     await tester.pump(const Duration(milliseconds: 250));
     final e = tester.takeException();
-    if (e != null && e.toString().contains('overflowed')) {
-      fautes.add(e.toString().split('\n').first);
-    }
+    if (e == null) continue;
+    // Toute exception compte, pas seulement les débordements. Ne retenir que
+    // « overflowed » revenait à déclarer verts des écrans qui n'arrivaient même pas à se
+    // construire : un test qui avale les erreurs est pire qu'un test absent.
+    fautes.add(e.toString().split('\n').first);
   }
   return fautes;
 }
 
 void main() {
   setUpAll(() async {
-    GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferences.setMockInitialValues({});
     await initSupabase();
     await _chargerPolices();
@@ -78,6 +111,13 @@ void main() {
     'Commande': () => const ClaimOrderScreen(),
     'Créer un compte': () => const InvitationCompteScreen(fonction: 'Le mode cuisine'),
     'Créateurs': () => const CreateursScreen(),
+    // Ajouté le 13/11/2026 avec le bouton « Télécharger mes données » : tout écran qu'on
+    // touche entre dans ce test, sinon la couverture se périme sans qu'on le voie.
+    'Compte': () => const AccountScreen(),
+    // La fenêtre de consentement à la mesure entre dans les contrôles comme un écran :
+    // c'est la première chose que voit un nouvel utilisateur, et elle porte deux boutons
+    // dont l'un ne doit surtout pas être moins lisible que l'autre.
+    'Consentement mesure': () => const Scaffold(body: ConsentementMesure()),
   };
 
   for (final entree in ecrans.entries) {

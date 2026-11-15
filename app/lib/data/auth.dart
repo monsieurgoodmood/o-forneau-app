@@ -19,12 +19,13 @@ class GuestNotifier extends StateNotifier<bool> {
 final guestProvider = StateNotifierProvider<GuestNotifier, bool>((ref) => GuestNotifier(ref.watch(prefsProvider)));
 
 /// Flux de session Supabase.
-final authChangesProvider = StreamProvider<AuthState>((ref) => supabase.auth.onAuthStateChange);
+final authChangesProvider = StreamProvider<AuthState>(
+    (ref) => supabasePret ? supabase.auth.onAuthStateChange : const Stream<AuthState>.empty());
 
-/// Utilisateur courant (null = déconnecté).
+/// Utilisateur courant (null = déconnecté — ou client non initialisé : même chose pour l'app).
 final currentUserProvider = Provider<User?>((ref) {
   ref.watch(authChangesProvider);
-  return supabase.auth.currentUser;
+  return supabasePret ? supabase.auth.currentUser : null;
 });
 
 /// Actions d'authentification.

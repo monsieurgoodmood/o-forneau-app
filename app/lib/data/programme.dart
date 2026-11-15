@@ -182,10 +182,17 @@ class PlanItem {
 }
 
 List<PlanItem> buildPlan(List<Recipe> all, List<String> diets, int seed,
-    {bool gouter = false, int cibleKcal = 0}) {
+    {bool gouter = false, int cibleKcal = 0,
+    Map<String, String> verrous = const {}, Map<String, int> decalages = const {}}) {
   final out = <PlanItem>[];
   void add(String l, String cat, int off) {
-    final r = pickMeal(all, cat, off, diets, seed, cibleKcal: cibleKcal);
+    // Un repas verrouille ne bouge plus, quoi qu'il arrive a la journee.
+    final fige = verrous[cat];
+    if (fige != null) {
+      final r = all.where((x) => x.slug == fige).firstOrNull;
+      if (r != null) { out.add(PlanItem(l, r)); return; }
+    }
+    final r = pickMeal(all, cat, off + (decalages[cat] ?? 0), diets, seed, cibleKcal: cibleKcal);
     if (r != null) out.add(PlanItem(l, r));
   }
   add('Petit-déjeuner', 'petit-dej', 0);
@@ -194,6 +201,14 @@ List<PlanItem> buildPlan(List<Recipe> all, List<String> diets, int seed,
   if (gouter) add('Goûter', 'gouter', 0);
   return out;
 }
+
+/// Creneau d'un libelle de repas, pour relier l'affichage aux verrous.
+String creneauDe(String label) => switch (label) {
+      'Petit-déjeuner' => 'petit-dej',
+      'Déjeuner' => 'dejeuner',
+      'Dîner' => 'diner',
+      _ => 'gouter',
+    };
 
 /// Total réellement proposé par la journée.
 int totalKcal(List<PlanItem> plan) =>
@@ -260,6 +275,15 @@ class FoyerNotifier extends StateNotifier<Foyer> {
 final progProvider = StateNotifierProvider<ProgNotifier, Prog>((ref) => ProgNotifier(ref.watch(prefsProvider), ref));
 final foyerProvider = StateNotifierProvider<FoyerNotifier, Foyer>((ref) => FoyerNotifier(ref.watch(prefsProvider), ref));
 final menuSeedProvider = StateProvider<int>((ref) => 1);
+
+/// Repas verrouilles, par creneau ('petit-dej', 'dejeuner', 'diner', 'gouter').
+/// Ticket A27 : « Regenerer » rejouait TOUTE la journee, donc un plat qu'on venait
+/// d'accepter disparaissait avec le reste. On garde ce qui est verrouille, et on ne
+/// retire que les autres.
+final repasVerrouillesProvider = StateProvider<Map<String, String>>((ref) => {});
+
+/// Decalage propre a chaque creneau, pour remplacer UN repas sans toucher aux autres.
+final decalageRepasProvider = StateProvider<Map<String, int>>((ref) => {});
 final gouterProvider = StateProvider<bool>((ref) => false);
 
 /// Menu du jour compatible avec tous les régimes du foyer.
@@ -270,5 +294,7 @@ final dailyPlanProvider = Provider<List<PlanItem>>((ref) {
   // La cible guide la composition : sans elle, la journee tombait ou elle voulait.
   final cible = progTarget(prog).kcal;
   return buildPlan(all, diets, ref.watch(menuSeedProvider),
-      gouter: ref.watch(gouterProvider), cibleKcal: cible);
+      gouter: ref.watch(gouterProvider), cibleKcal: cible,
+      verrous: ref.watch(repasVerrouillesProvider),
+      decalages: ref.watch(decalageRepasProvider));
 });

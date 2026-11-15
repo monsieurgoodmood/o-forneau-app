@@ -154,7 +154,7 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
       padding: const EdgeInsets.all(AppSpacing.s16),
       decoration: BoxDecoration(color: AppColors.cardBg, borderRadius: BorderRadius.circular(AppRadius.r16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(L.of(context).votreAvis, style: AppTypography.eyebrow(AppColors.gold)),
+        Text(L.of(context).votreAvis, style: AppTypography.eyebrow()),
         const SizedBox(height: AppSpacing.s8),
         for (final c in _crits)
           Padding(
@@ -204,6 +204,22 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
             Text(' prête', style: t.textTheme.labelMedium),
           ],
         ]),
+        // Une photo de plat devient publique, avec le prénom de son auteur. Rien ne le
+        // disait : les deux boutons annonçaient « Photo » et « Galerie », et le bouton
+        // d'envoi « Publier mon avis ». On ne peut pas laisser quelqu'un découvrir après
+        // coup que sa cuisine — et ce qu'il y avait autour — est visible de tous. La
+        // mention apparaît au moment du choix, pas enfouie dans la politique.
+        if (_photo != null) ...[
+          const SizedBox(height: AppSpacing.s8),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.visibility_outlined, size: 16, color: AppColors.muted),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(L.of(context).photoPublique,
+                  style: t.textTheme.labelSmall?.copyWith(color: AppColors.muted)),
+            ),
+          ]),
+        ],
         const SizedBox(height: AppSpacing.s16),
         FilledButton(
           onPressed: canSubmit ? _submit : null,
@@ -232,7 +248,7 @@ class _PhotoGallery extends ConsumerWidget {
     if (photos.isEmpty) return const SizedBox.shrink();
     final me = ref.watch(currentUserProvider)?.id;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(L.of(context).lesPlatsDeLaCommunaute, style: AppTypography.eyebrow(AppColors.gold)),
+      Text(L.of(context).lesPlatsDeLaCommunaute, style: AppTypography.eyebrow()),
       const SizedBox(height: AppSpacing.s8),
       SizedBox(
         height: 120,
@@ -280,7 +296,7 @@ class _PhotoGallery extends ConsumerWidget {
               if (mine)
                 TextButton(
                   onPressed: () async { await ref.read(communityActionsProvider).deletePhoto(p.slug, p); if (context.mounted) Navigator.pop(context); },
-                  child: Text(L.of(context).supprimer, style: TextStyle(color: Colors.white)),
+                  child: Text(L.of(context).supprimer, style: const TextStyle(color: Colors.white)),
                 )
               else
                 TextButton(
@@ -308,7 +324,7 @@ class _CommentList extends ConsumerWidget {
     final me = ref.watch(currentUserProvider)?.id;
     if (comments.isEmpty) return const SizedBox.shrink();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(L.of(context).commentaires, style: AppTypography.eyebrow(AppColors.gold)),
+      Text(L.of(context).commentaires, style: AppTypography.eyebrow()),
       const SizedBox(height: AppSpacing.s8),
       for (final c in comments)
         Container(

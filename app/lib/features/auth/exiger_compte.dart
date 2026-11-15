@@ -45,7 +45,7 @@ class InvitationCompteScreen extends ConsumerWidget {
       body: ListView(
         padding: EdgeInsets.fromLTRB(margin, 0, margin, AppSpacing.s32),
         children: [
-          Text(L.of(context).creezVotreCompte2, style: AppTypography.eyebrow(AppColors.gold)),
+          Text(L.of(context).creezVotreCompte2, style: AppTypography.eyebrow()),
           const SizedBox(height: AppSpacing.s8),
           Text(
             fonction.isEmpty ? L.of(context).unCompteEtOnCuisine : '$fonction\ndemande un compte',

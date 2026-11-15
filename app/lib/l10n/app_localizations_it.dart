@@ -258,7 +258,7 @@ class LIt extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Account creato. Controlla la tua casella di posta elettronica per verificare se viene richiesta una conferma, quindi accedi.';
+      'Account creato. Un’e-mail è in arrivo: cliccate sul suo link per confermare l’indirizzo, poi accedete.';
 
   @override
   String get invalidLogin => 'Accesso non valido';
@@ -722,4 +722,82 @@ class LIt extends L {
 
   @override
   String get unGourmand => 'Un buongustaio';
+
+  @override
+  String get photoPublique =>
+      'La tua foto e il tuo nome saranno visibili a chiunque apra questa ricetta. Puoi rimuoverli in qualsiasi momento.';
+
+  @override
+  String get telechargerMesDonnees => 'Scarica i miei dati';
+
+  @override
+  String get exportPrepare =>
+      'I tuoi dati sono pronti. Si apriranno nel tuo browser; salva il file per conservarlo.';
+
+  @override
+  String get exportEchoue =>
+      'Impossibile preparare l\'esportazione al momento. Si prega di riprovare più tardi o di scrivere a contact@forneau.com.';
+
+  @override
+  String get mesureTitre => 'Aiutaci a migliorare l\'app?';
+
+  @override
+  String get mesureTexte =>
+      'Vorremmo sapere quali schermate vengono utilizzate dagli utenti e dove riscontrano difficoltà, in modo da poter migliorare l\'app. Nessun dato che vi identifichi viene trasmesso: né la vostra email, né il vostro nome, né ciò che digitate. Rifiutare non comporta la disattivazione di alcuna funzionalità.';
+
+  @override
+  String get mesureAccepter => 'Accettare';
+
+  @override
+  String get mesureRefuser => 'Rifiutare';
+
+  @override
+  String get mesureRevenir => 'Misura di utilizzo: riconsiderare la mia scelta';
+
+  @override
+  String get mesureEnregistre =>
+      'Ho capito. Puoi modificarlo dalla schermata dell\'account.';
+
+  @override
+  String get notifTitre => 'Essere avvisati quando è utile?';
+
+  @override
+  String get notifTexte =>
+      'Un’idea per stasera, una ricetta adatta al vostro frigo o ai preferiti, le novità, la fine della prova. Al massimo una al giorno, mai di notte, e scegliete voi gli argomenti. Rifiutare non toglie alcuna funzione.';
+
+  @override
+  String get notifAccepter => 'Attivare';
+
+  @override
+  String get notifRefuser => 'Non ora';
+
+  @override
+  String get notifEnregistre => 'Preso nota.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'Il telefono ha rifiutato le notifiche. Potete autorizzarle nelle impostazioni e riattivarle qui.';
+
+  @override
+  String get notifSection => 'Notifiche';
+
+  @override
+  String get notifSectionTexte =>
+      'Al massimo una al giorno, mai tra le 21 e le 9.';
+
+  @override
+  String get notifCatSoir => 'Un’idea per stasera e il fine settimana';
+
+  @override
+  String get notifCatPerso => 'In base a frigo, preferiti e a ciò che cucino';
+
+  @override
+  String get notifCatNouveautes => 'Nuove ricette';
+
+  @override
+  String get notifCatAcces => 'Il mio accesso e la prova';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Indirizzo non ancora confermato: aprite l’e-mail ricevuta, cliccate sul link e riprovate.';
 }

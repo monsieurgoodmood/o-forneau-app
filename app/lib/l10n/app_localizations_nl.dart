@@ -258,7 +258,7 @@ class LNl extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Account aangemaakt. Controleer uw e-mails voor een bevestigingsverzoek en log vervolgens in.';
+      'Account aangemaakt. Er is een e-mail onderweg: klik op de link om uw adres te bevestigen en meld u daarna aan.';
 
   @override
   String get invalidLogin => 'Ongeldige login';
@@ -723,4 +723,83 @@ class LNl extends L {
 
   @override
   String get unGourmand => 'Een fijnproever';
+
+  @override
+  String get photoPublique =>
+      'Je foto en voornaam zijn zichtbaar voor iedereen die dit recept opent. Je kunt ze op elk moment verwijderen.';
+
+  @override
+  String get telechargerMesDonnees => 'Download mijn gegevens';
+
+  @override
+  String get exportPrepare =>
+      'Je gegevens zijn gereed. Ze worden in je browser geopend; sla het bestand op om het te bewaren.';
+
+  @override
+  String get exportEchoue =>
+      'Het is momenteel niet mogelijk om de export voor te bereiden. Probeer het later opnieuw of neem contact op met contact@forneau.com.';
+
+  @override
+  String get mesureTitre => 'Help ons de app te verbeteren?';
+
+  @override
+  String get mesureTexte =>
+      'We willen graag weten welke schermen mensen gebruiken en waar ze vastlopen, zodat we de app kunnen verbeteren. Er worden geen persoonlijke gegevens verzonden – niet uw e-mailadres, niet uw voornaam, niet wat u typt. Als u weigert, worden er geen functies verwijderd.';
+
+  @override
+  String get mesureAccepter => 'Accepteren';
+
+  @override
+  String get mesureRefuser => 'Weigeren';
+
+  @override
+  String get mesureRevenir => 'Gebruiksmaatregel: heroverweeg mijn keuze';
+
+  @override
+  String get mesureEnregistre =>
+      'Oké, ik snap het. Je kunt het wijzigen via het accountscherm.';
+
+  @override
+  String get notifTitre => 'Een seintje krijgen als het nuttig is?';
+
+  @override
+  String get notifTexte =>
+      'Een idee voor vanavond, een recept dat past bij uw koelkast of favorieten, nieuwe recepten, het einde van uw proefperiode. Hoogstens één per dag, nooit ’s nachts, en u kiest de onderwerpen. Weigeren kost geen enkele functie.';
+
+  @override
+  String get notifAccepter => 'Inschakelen';
+
+  @override
+  String get notifRefuser => 'Niet nu';
+
+  @override
+  String get notifEnregistre => 'Genoteerd.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'De telefoon heeft meldingen geweigerd. U kunt ze toestaan in de instellingen en hier opnieuw inschakelen.';
+
+  @override
+  String get notifSection => 'Meldingen';
+
+  @override
+  String get notifSectionTexte =>
+      'Hoogstens één per dag, nooit tussen 21 en 9 uur.';
+
+  @override
+  String get notifCatSoir => 'Een idee voor vanavond en het weekend';
+
+  @override
+  String get notifCatPerso =>
+      'Op basis van mijn koelkast, favorieten en wat ik kook';
+
+  @override
+  String get notifCatNouveautes => 'Nieuwe recepten';
+
+  @override
+  String get notifCatAcces => 'Mijn toegang en proefperiode';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Adres nog niet bevestigd: open de ontvangen e-mail, klik op de link en probeer het opnieuw.';
 }

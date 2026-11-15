@@ -80,6 +80,20 @@ const kPaliers = [(70, 3), (100, 6), (150, 12)];
 
 /// Actions d'accès : réclamer une commande, lancer l'essai, acheter, restaurer.
 class AccesActions {
+  /// L'accès offert s'ouvre tout seul : à chaque connexion, le serveur rapproche l'e-mail du
+  /// compte des commandes Forneau payées (lier-commandes). Silencieux : si rien ne change,
+  /// rien ne s'affiche ; si une commande vient d'ouvrir l'accès, la carte « votre accès » se
+  /// met à jour d'elle-même.
+  Future<void> lierCommandes() async {
+    try {
+      final rep = await supabase.functions.invoke('lier-commandes');
+      final d = rep.data;
+      if (d is Map && (d['nouvelles'] as List?)?.isNotEmpty == true) ref.invalidate(accesProvider);
+    } catch (_) {
+      // Shopify ou réseau indisponible : la tournée horaire du serveur rattrapera.
+    }
+  }
+
   AccesActions(this.ref);
   final Ref ref;
 

@@ -35,6 +35,8 @@ class _AppGateState extends ConsumerState<AppGate> {
       _dernierUser = user?.id;
       if (user != null) {
         RevenueCat.configurer(user.id);
+        // Client Forneau ? Ses mois offerts s'ouvrent sans qu'il ait à retrouver un numéro de commande.
+        Future.microtask(() => ref.read(accesActionsProvider).lierCommandes());
       } else {
         RevenueCat.deconnecter();
       }

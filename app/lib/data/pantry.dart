@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth.dart';
+import 'mesure.dart';
 import 'recipe.dart';
 import 'supabase_client.dart';
 
@@ -89,6 +90,14 @@ class _SetNotifier extends StateNotifier<Set<String>> {
     } catch (_) {}
     return {};
   }
+  /// Le nom d'un ingrédient est écrit par la personne : il ne part jamais. Seul part
+  /// COMBIEN elle en a — c'est ce qui dit si le frigo sert vraiment ou s'il reste vide.
+  void _mesurer(String quoi) {
+    _ref.read(mesureProvider).suivre('clic', {
+      'action': _key == 'pantry' ? 'frigo' : 'courses', 'valeur': quoi, 'total': state.length,
+    });
+  }
+
   Future<void> _save() async {
     await _p.setString('mf_$_key', jsonEncode(state.toList()));
     _cloudMerge(_ref, _key, state.toList());
@@ -113,21 +122,30 @@ class _SetNotifier extends StateNotifier<Set<String>> {
   }
   Future<void> toggle(String v) async {
     final s = Set<String>.from(state);
-    s.contains(v) ? s.remove(v) : s.add(v);
+    final retire = s.contains(v);
+    retire ? s.remove(v) : s.add(v);
     state = s;
+    _mesurer(retire ? 'retrait' : 'ajout');
     await _save();
   }
   Future<void> add(String v) async {
     final x = v.trim();
+    // Rien ajouté, rien à mesurer : compter un doublon gonflerait le chiffre sans qu'il
+    // se soit rien passé.
     if (x.isEmpty || state.contains(x)) return;
     state = {...state, x};
+    _mesurer('ajout');
     await _save();
   }
   Future<void> remove(String v) async {
     state = Set<String>.from(state)..remove(v);
+    _mesurer('retrait');
     await _save();
   }
   Future<void> clear() async {
+    // Ici on mesure AVANT : c'est le nombre d'éléments effacés qui informe, pas le zéro
+    // qui suit.
+    _mesurer('vide');
     state = {};
     await _save();
   }

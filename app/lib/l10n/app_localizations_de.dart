@@ -258,7 +258,7 @@ class LDe extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Konto erstellt. Prüfen Sie Ihre E-Mails, falls eine Bestätigung angefordert wird, und melden Sie sich anschließend an.';
+      'Konto erstellt. Eine E-Mail ist unterwegs: Klicken Sie auf den Link, um Ihre Adresse zu bestätigen, und melden Sie sich dann an.';
 
   @override
   String get invalidLogin => 'Ungültige Anmeldung';
@@ -726,4 +726,83 @@ class LDe extends L {
 
   @override
   String get unGourmand => 'Ein Feinschmecker';
+
+  @override
+  String get photoPublique =>
+      'Ihr Foto und Ihr Vorname werden für jeden sichtbar sein, der dieses Rezept öffnet. Sie können diese Angaben jederzeit entfernen.';
+
+  @override
+  String get telechargerMesDonnees => 'Meine Daten herunterladen';
+
+  @override
+  String get exportPrepare =>
+      'Ihre Daten sind fertig. Sie werden in Ihrem Browser geöffnet; speichern Sie die Datei, um sie zu behalten.';
+
+  @override
+  String get exportEchoue =>
+      'Der Export kann momentan nicht vorbereitet werden. Bitte versuchen Sie es später erneut oder schreiben Sie an contact@forneau.com.';
+
+  @override
+  String get mesureTitre => 'Helfen Sie uns, die App zu verbessern?';
+
+  @override
+  String get mesureTexte =>
+      'Wir möchten wissen, welche Bildschirme die Nutzer verwenden und wo sie Schwierigkeiten haben, um die App zu verbessern. Es werden keine personenbezogenen Daten übertragen – weder Ihre E-Mail-Adresse noch Ihr Vorname oder Ihre Eingaben. Wenn Sie die Teilnahme ablehnen, stehen Ihnen alle Funktionen zur Verfügung.';
+
+  @override
+  String get mesureAccepter => 'Akzeptieren';
+
+  @override
+  String get mesureRefuser => 'Verweigern';
+
+  @override
+  String get mesureRevenir => 'Nutzungsmaßnahme: Meine Wahl überdenken';
+
+  @override
+  String get mesureEnregistre =>
+      'Verstanden. Sie können dies im Kontobereich ändern.';
+
+  @override
+  String get notifTitre => 'Bescheid bekommen, wenn es nützlich ist?';
+
+  @override
+  String get notifTexte =>
+      'Eine Idee für heute Abend, ein Rezept passend zu Kühlschrank oder Favoriten, neue Rezepte, das Ende Ihrer Testphase. Höchstens eine am Tag, nie nachts, und Sie wählen die Themen. Ablehnen nimmt keine Funktion weg.';
+
+  @override
+  String get notifAccepter => 'Aktivieren';
+
+  @override
+  String get notifRefuser => 'Jetzt nicht';
+
+  @override
+  String get notifEnregistre => 'Notiert.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'Das Telefon hat Benachrichtigungen abgelehnt. Sie können sie in den Einstellungen erlauben und hier wieder aktivieren.';
+
+  @override
+  String get notifSection => 'Benachrichtigungen';
+
+  @override
+  String get notifSectionTexte =>
+      'Höchstens eine am Tag, nie zwischen 21 und 9 Uhr.';
+
+  @override
+  String get notifCatSoir => 'Eine Idee für heute Abend und das Wochenende';
+
+  @override
+  String get notifCatPerso =>
+      'Nach Kühlschrank, Favoriten und dem, was ich koche';
+
+  @override
+  String get notifCatNouveautes => 'Neue Rezepte';
+
+  @override
+  String get notifCatAcces => 'Mein Zugang und meine Testphase';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Adresse noch nicht bestätigt: Öffnen Sie die erhaltene E-Mail, klicken Sie auf den Link und versuchen Sie es erneut.';
 }

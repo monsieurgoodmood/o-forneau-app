@@ -257,7 +257,7 @@ class LEn extends L {
 
   @override
   String get compteCreeVerifiezVosEMails =>
-      'Account created. Check your emails if a confirmation is requested, then log in.';
+      'Account created. An e-mail is on its way: click its link to confirm your address, then sign in.';
 
   @override
   String get invalidLogin => 'Invalid login';
@@ -720,4 +720,82 @@ class LEn extends L {
 
   @override
   String get unGourmand => 'A gourmand';
+
+  @override
+  String get photoPublique =>
+      'Your photo and first name will be visible to everyone who opens this recipe. You can remove it at any time.';
+
+  @override
+  String get telechargerMesDonnees => 'Download my data';
+
+  @override
+  String get exportPrepare =>
+      'Your data is ready. It will open in your browser; save the file to keep it.';
+
+  @override
+  String get exportEchoue =>
+      'Unable to prepare the export at the moment. Please try again, or write to contact@forneau.com.';
+
+  @override
+  String get mesureTitre => 'Help us improve the app?';
+
+  @override
+  String get mesureTexte =>
+      'We\'d like to know which screens people use and where they get stuck, so we can improve the app. Nothing that identifies you is transmitted—not your email, not your first name, not what you type. Declining doesn\'t remove any features.';
+
+  @override
+  String get mesureAccepter => 'Accept';
+
+  @override
+  String get mesureRefuser => 'Refuse';
+
+  @override
+  String get mesureRevenir => 'Usage measure: reconsider my choice';
+
+  @override
+  String get mesureEnregistre =>
+      'Noted. You can change it from the Account screen.';
+
+  @override
+  String get notifTitre => 'Get a heads-up when it’s useful?';
+
+  @override
+  String get notifTexte =>
+      'An idea for tonight, a recipe that matches your fridge or favourites, new recipes, the end of your trial. At most one a day, never at night, and you choose the topics. Declining removes no feature.';
+
+  @override
+  String get notifAccepter => 'Turn on';
+
+  @override
+  String get notifRefuser => 'Not now';
+
+  @override
+  String get notifEnregistre => 'Noted.';
+
+  @override
+  String get notifRefuseeSysteme =>
+      'The phone declined notifications. You can allow them in its settings, then turn them on again here.';
+
+  @override
+  String get notifSection => 'Notifications';
+
+  @override
+  String get notifSectionTexte =>
+      'At most one a day, never between 9 pm and 9 am.';
+
+  @override
+  String get notifCatSoir => 'An idea for tonight and the weekend';
+
+  @override
+  String get notifCatPerso => 'Based on my fridge, favourites and what I cook';
+
+  @override
+  String get notifCatNouveautes => 'New recipes';
+
+  @override
+  String get notifCatAcces => 'My access and trial';
+
+  @override
+  String get adressePasEncoreConfirmee =>
+      'Address not confirmed yet: open the e-mail you received and click its link, then try again.';
 }

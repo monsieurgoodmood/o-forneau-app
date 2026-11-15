@@ -71,6 +71,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   String _pretty(String raw) {
+    if (raw.toLowerCase().contains('not confirmed')) return L.of(context).adressePasEncoreConfirmee;
     if (raw.contains(L.of(context).invalidLogin)) return L.of(context).eMailOuMotDePasse;
     if (raw.contains(L.of(context).alreadyRegistered)) return L.of(context).unCompteExisteDejaAvecCet;
     if (raw.contains(L.of(context).passwordShould)) return L.of(context).motDePasseTropCourt6;

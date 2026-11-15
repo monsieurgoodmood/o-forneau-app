@@ -11,4 +11,16 @@ class SupabaseConfig {
 
 SupabaseClient get supabase => Supabase.instance.client;
 
+/// Vrai quand `initSupabase` a abouti. Au démarrage en mode dégradé (serveur injoignable,
+/// délai dépassé) ou dans les tests, l'instance n'existe pas : y accéder lèverait une
+/// assertion. Tout ce qui peut vivre sans compte vérifie ceci avant de toucher au client.
+bool get supabasePret {
+  try {
+    Supabase.instance;
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 Future<void> initSupabase() => Supabase.initialize(url: SupabaseConfig.url, anonKey: SupabaseConfig.anonKey);

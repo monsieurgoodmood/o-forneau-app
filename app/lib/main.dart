@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,7 +6,11 @@ import 'core/router/app_router.dart';
 import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'data/auth.dart';
+import 'data/mesure.dart';
+import 'data/notifications.dart';
+import 'features/notifications/consentement_notifications.dart';
 import 'data/supabase_client.dart';
+import 'features/mesure/consentement_mesure.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +35,9 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('Supabase init échoué (mode dégradé) : $e');
   }
+  // Firebase ne sert qu'au transport des notifications (voir notifications.dart). Borné
+  // lui aussi : sans lui, l'app démarre, simplement sans notifications.
+  await Notifications.initialiser();
   // Les réglages locaux, eux, ne sortent pas de l'appareil : une lenteur est possible,
   // une panne définitive non. On réessaie une fois avant de laisser l'erreur remonter.
   SharedPreferences prefs;
@@ -47,11 +55,50 @@ Future<void> main() async {
   );
 }
 
-class OForneauApp extends ConsumerWidget {
+class OForneauApp extends ConsumerStatefulWidget {
   const OForneauApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OForneauApp> createState() => _OForneauAppState();
+}
+
+class _OForneauAppState extends ConsumerState<OForneauApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // La question de la mesure n'est posée qu'une fois l'app affichée, et elle attend
+    // trois secondes : on laisse voir ce qu'on propose avant de demander quoi que ce soit.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final notifs = ref.read(notificationsProvider);
+      await notifs.compterSession();
+      notifs.brancher(ref.read(appRouterProvider));
+      unawaited(notifs.rafraichirSiBesoin());
+      if (!mounted) return;
+      await ConsentementMesure.demanderSiBesoin(context, ref);
+      // La question des notifications vient APRÈS celle de la mesure, jamais en même temps :
+      // deux fenêtres d'affilée au premier écran, c'est un péage, pas un choix.
+      if (mounted) await ConsentementNotifications.demanderSiBesoin(context, ref);
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState etat) {
+    // Sans cela, le temps passé sur le dernier écran ne serait jamais compté : l'app part
+    // en arrière-plan et l'événement reste dans la file.
+    if (etat != AppLifecycleState.resumed) ref.read(mesureProvider).miseEnPause();
+    if (etat == AppLifecycleState.resumed) unawaited(ref.read(notificationsProvider).rafraichirSiBesoin());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       title: 'Ô Forneau !',

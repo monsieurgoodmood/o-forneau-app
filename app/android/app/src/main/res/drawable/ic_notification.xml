@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Poêle vue de dessus, en silhouette : les icônes de notification sont monochromes, Android
+     les teinte avec default_notification_color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+  <path android:fillColor="#FFFFFFFF"
+      android:pathData="M9.5,13a6.5,6.5 0 1,1 13,0a6.5,6.5 0 1,1 -13,0zM12,13a4,4 0 1,0 8,0a4,4 0 1,0 -8,0z"/>
+  <path android:fillColor="#FFFFFFFF"
+      android:pathData="M1.5,11.6h8.2v2.8H1.5a1.4,1.4 0 0,1 0,-2.8z"/>
+</vector>
