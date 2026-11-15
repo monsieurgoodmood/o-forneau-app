@@ -53,5 +53,7 @@
 	<string>Photographiez votre plat pour le partager avec la communauté.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choisissez une photo de votre plat à partager avec la communauté.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
