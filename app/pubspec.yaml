@@ -33,6 +33,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
   flutter_lints: ^4.0.0
 
 flutter:
@@ -63,3 +64,14 @@ flutter:
           weight: 600
         - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
+
+# Icône de l'app — celle de la marque, pas celle de Flutter. Apple a refusé la 1.1.1 (2.3.8 :
+# « placeholder icons ») parce que l'icône par défaut était restée. `dart run flutter_launcher_icons`
+# régénère iOS (AppIcon.appiconset) et Android (mipmaps + icône adaptative).
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: assets/icon/icon-1024.png
+  adaptive_icon_background: "#2D4A2B"
+  adaptive_icon_foreground: assets/icon/foreground-1024.png
